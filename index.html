@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HỘI NHẬU ONLINE — TikTok Live Game</title>
+<style>
+  :root { --gold:#ffd36b; --red:#e84c3d; --ink:#17131d; --cream:#fff5df; --green:#5ac58b; }
+  * { box-sizing:border-box }
+  body { margin:0; color:var(--cream); font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    background:radial-gradient(ellipse at 50% 15%,#573326 0,#241820 42%,#101018 100%); min-height:100vh; }
+  .wrap { max-width:1200px; margin:auto; padding:24px; }
+  header { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+  .brand { font-weight:1000; letter-spacing:.08em; font-size:clamp(24px,4vw,42px); color:var(--gold); text-shadow:0 3px #6a321d; }
+  .tag { border:1px solid #a97843; border-radius:999px; padding:8px 13px; color:#ffdf9c; font-size:13px; }
+  .layout { display:grid; grid-template-columns:minmax(0,1.5fr) minmax(280px,.8fr); gap:18px; margin-top:22px; }
+  .panel { background:#211c25e8; border:1px solid #604637; border-radius:22px; padding:20px; box-shadow:0 12px 35px #0005; }
+  .table { min-height:420px; position:relative; overflow:hidden; border-radius:18px; background:
+    radial-gradient(ellipse at center,#7b4a2d 0,#4c2e23 54%,#2c1c1b 70%); border:10px solid #34201b;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; padding:22px; }
+  .table:before { content:""; position:absolute; inset:12px; border:2px solid #c28a4d55; border-radius:50%; }
+  .round-title { z-index:1; font-size:clamp(20px,3vw,30px); text-align:center; font-weight:900; color:#ffe5aa; }
+  .sub { z-index:1; color:#f7c88c; text-align:center; margin-top:8px; }
+  .cups { z-index:1; display:flex; flex-wrap:wrap; justify-content:center; gap:14px; margin:26px 0; }
+  .cup { font-size:clamp(40px,7vw,68px); filter:drop-shadow(0 6px 2px #24120c); }
+  .players { z-index:1; display:flex; flex-wrap:wrap; justify-content:center; gap:9px; max-width:700px; }
+  .player { background:#21161de8; border:1px solid #c18b54; border-radius:14px; padding:9px 14px; text-align:center; min-width:90px; }
+  .player strong { display:block; color:#ffe4a6; }
+  .player small { color:#cbb8a1; }
+  h2 { margin:0 0 14px; font-size:19px; color:var(--gold); }
+  .status { padding:14px; background:#151219; border-radius:14px; border:1px solid #51404a; min-height:88px; line-height:1.45; }
+  .status b { color:#ffdb80; }
+  .controls { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px; }
+  button { cursor:pointer; border:0; border-radius:12px; padding:12px 14px; font-weight:800; font-size:14px; color:#21151a;
+    background:linear-gradient(#ffe08c,#eeb34e); box-shadow:0 3px #8d5529; transition:transform .08s; }
+  button:active { transform:translateY(2px); box-shadow:0 1px #8d5529; }
+  button.alt { background:linear-gradient(#ff8b75,#df443b); color:#fff; box-shadow:0 3px #822c28; }
+  button.dark { background:#37303b; color:#f7e8d0; box-shadow:0 3px #17121a; border:1px solid #665361; }
+  button.green { background:linear-gradient(#9be8b5,#55bc81); box-shadow:0 3px #287449; }
+  input { width:100%; border-radius:10px; border:1px solid #6b5360; padding:11px 12px; background:#151219; color:#fff4df; margin:0 0 9px; font:inherit; }
+  .scoreboard { display:flex; flex-direction:column; gap:8px; margin-top:14px; max-height:210px; overflow:auto; }
+  .score { display:flex; align-items:center; justify-content:space-between; gap:8px; background:#17131b; padding:10px 12px; border-radius:10px; border:1px solid #42333f; }
+  .score span { color:#ffdf9a; font-weight:800; }
+  .score small { color:#c5b6c7; }
+  .footer { color:#b9a9b4; font-size:12px; margin:16px 2px 0; line-height:1.5; }
+  .toast { color:#d4ffdf; margin-top:10px; min-height:20px; font-size:13px; }
+  @media(max-width:800px) { .layout{grid-template-columns:1fr} .table{min-height:330px} .wrap{padding:14px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">🍻 HỘI NHẬU ONLINE</div>
+    <div class="tag">MINI GAME DÀNH CHO TIKTOK LIVE · CHỈ NHẬU ẢO</div>
+  </header>
+  <div class="layout">
+    <main class="panel">
+      <div class="table">
+        <div class="round-title" id="roundTitle">BÀN NHẬU ĐÃ LÊN ĐÈN!</div>
+        <div class="sub" id="roundSub">Thêm tên người chơi rồi bấm “Bắt đầu kèo”</div>
+        <div class="cups" id="cups"><span class="cup">🍺</span><span class="cup">🥜</span><span class="cup">🍻</span></div>
+        <div class="players" id="playerSeats"></div>
+      </div>
+      <div class="controls">
+        <button class="green" id="startBtn">▶ BẮT ĐẦU KÈO</button>
+        <button id="challengeBtn">🎲 BỐC THỬ THÁCH</button>
+        <button class="alt" id="toastBtn">🍻 CỤNG LY ẢO</button>
+        <button class="dark" id="resetBtn">↻ KÈO MỚI</button>
+      </div>
+      <div class="toast" id="toast" aria-live="polite"></div>
+    </main>
+    <aside class="panel">
+      <h2>🪑 Thêm người vào bàn</h2>
+      <input id="playerName" maxlength="22" placeholder="Tên viewer / biệt danh...">
+      <button class="green" id="addBtn" style="width:100%">＋ THÊM NGƯỜI CHƠI</button>
+      <div class="scoreboard" id="scoreboard"></div>
+      <div style="height:1px;background:#51404a;margin:18px 0"></div>
+      <h2>🎤 Nội dung kèo</h2>
+      <div class="status" id="challengeText">Bấm “Bốc thử thách” để lấy một câu vui cho bàn nhậu.</div>
+      <div class="controls">
+        <button class="dark" id="nextBtn">Người tiếp theo →</button>
+        <button class="dark" id="removeBtn">− Xóa người cuối</button>
+      </div>
+      <p class="footer">Game dùng điểm và hiệu ứng “cụng ly” ảo. Không cần uống đồ có cồn — có thể thay bằng nước lọc, nước ngọt hoặc chỉ chơi vui.</p>
+    </aside>
+  </div>
+  <p class="footer">OBS: thêm bằng Browser Source (URL GitHub Pages), đặt khung 1280×720 hoặc 1920×1080. Dùng nút điều khiển trong trang để host game khi livestream.</p>
+</div>
+<script>
+const challenges = [
+ "Kể một pha quê nhất trong 20 giây.",
+ "Nói một câu thả thính mà không được cười.",
+ "Ai từng ngủ quên trên xe? Kể nhanh!",
+ "Đọc tên 3 món ăn vặt trong 5 giây.",
+ "Bắt chước giọng người gọi món: “Cho thêm dĩa nữa!”",
+ "Chọn một người và dành lời khen thật lòng.",
+ "Nói một câu như tổng đài quán nhậu.",
+ "Oẳn tù tì với người tiếp theo — thắng được 1 điểm.",
+ "Kể một chuyện xui mà giờ nghĩ lại thấy mắc cười.",
+ "Cả bàn cùng tạo dáng cụng ly ảo!"
+];
+let players = [], current = 0, started = false, challengeIndex = 0;
+const $ = id => document.getElementById(id);
+function render(){
+  $("playerSeats").innerHTML = players.map((p,i)=>`<div class="player"><strong>${escapeHtml(p.name)}${i===current && players.length ? " 👈":""}</strong><small>${p.points} điểm · ${p.toasts} cụng</small></div>`).join("");
+  $("scoreboard").innerHTML = players.map((p,i)=>`<div class="score"><div><span>${i+1}. ${escapeHtml(p.name)}</span><br><small>${p.toasts} lần cụng ly ảo</small></div><b>${p.points} ⭐</b></div>`).join("");
+  $("roundSub").textContent = players.length ? `${players.length} người trên bàn · Lượt: ${players[current]?.name || "—"}` : "Thêm tên người chơi rồi bấm “Bắt đầu kèo”";
+}
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function addPlayer(){
+  const name = $("playerName").value.trim();
+  if(!name){$("toast").textContent="Nhập biệt danh trước nha!";return;}
+  if(players.length>=10){$("toast").textContent="Bàn này tối đa 10 người thôi!";return;}
+  players.push({name,points:0,toasts:0}); $("playerName").value="";
+  $("toast").textContent=`${name} đã vào bàn!`; render();
+}
+$("addBtn").onclick=addPlayer;
+$("playerName").addEventListener("keydown",e=>{if(e.key==="Enter")addPlayer();});
+$("startBtn").onclick=()=>{if(!players.length){$("toast").textContent="Thêm ít nhất một người chơi trước!";return;}started=true;$("roundTitle").textContent="KÈO ĐÃ BẮT ĐẦU!";$("challengeText").textContent="Host bốc thử thách hoặc cho viewer cụng ly ảo."; $("toast").textContent="Vào kèo thôi — chơi vui, không ép uống!";render();};
+$("challengeBtn").onclick=()=>{
+  const c=challenges[Math.floor(Math.random()*challenges.length)];
+  $("challengeText").textContent=c;
+  $("roundTitle").textContent="🎲 THỬ THÁCH MỚI";
+  if(players.length){players[current].points+=1; $("toast").textContent=`${players[current].name} nhận 1 điểm vì nhận kèo!`;render();}
+};
+$("toastBtn").onclick=()=>{
+  if(!players.length){$("toast").textContent="Thêm người chơi trước đã!";return;}
+  players[current].toasts+=1; players[current].points+=1;
+  $("cups").innerHTML='<span class="cup">✨</span><span class="cup">🍻</span><span class="cup">🎉</span>';
+  $("roundTitle").textContent="CỤNG LY ẢO! CHEERS!";
+  $("toast").textContent=`${players[current].name} +1 điểm! Cụng bằng nước gì cũng được nha.`;
+  render();
+};
+$("nextBtn").onclick=()=>{if(players.length){current=(current+1)%players.length;render();$("toast").textContent="Đến lượt "+players[current].name+"!";}};
+$("removeBtn").onclick=()=>{if(players.length){players.pop();current=Math.max(0,Math.min(current,players.length-1));render();$("toast").textContent="Đã xóa người chơi cuối bàn.";}};
+$("resetBtn").onclick=()=>{players=[];current=0;started=false;$("roundTitle").textContent="BÀN NHẬU ĐÃ LÊN ĐÈN!";$("roundSub").textContent="Thêm tên người chơi rồi bấm “Bắt đầu kèo”";$("challengeText").textContent="Bấm “Bốc thử thách” để lấy một câu vui cho bàn nhậu.";$("cups").innerHTML='<span class="cup">🍺</span><span class="cup">🥜</span><span class="cup">🍻</span>';$("toast").textContent="Đã mở kèo mới!";render();};
+render();
+</script>
+</body>
+</html>
