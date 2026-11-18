@@ -1,140 +1,322 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>HỘI NHẬU ONLINE — TikTok Live Game</title>
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Đại Chiến 50 Tướng — 6v6</title>
 <style>
-  :root { --gold:#ffd36b; --red:#e84c3d; --ink:#17131d; --cream:#fff5df; --green:#5ac58b; }
-  * { box-sizing:border-box }
-  body { margin:0; color:var(--cream); font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-    background:radial-gradient(ellipse at 50% 15%,#573326 0,#241820 42%,#101018 100%); min-height:100vh; }
-  .wrap { max-width:1200px; margin:auto; padding:24px; }
-  header { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
-  .brand { font-weight:1000; letter-spacing:.08em; font-size:clamp(24px,4vw,42px); color:var(--gold); text-shadow:0 3px #6a321d; }
-  .tag { border:1px solid #a97843; border-radius:999px; padding:8px 13px; color:#ffdf9c; font-size:13px; }
-  .layout { display:grid; grid-template-columns:minmax(0,1.5fr) minmax(280px,.8fr); gap:18px; margin-top:22px; }
-  .panel { background:#211c25e8; border:1px solid #604637; border-radius:22px; padding:20px; box-shadow:0 12px 35px #0005; }
-  .table { min-height:420px; position:relative; overflow:hidden; border-radius:18px; background:
-    radial-gradient(ellipse at center,#7b4a2d 0,#4c2e23 54%,#2c1c1b 70%); border:10px solid #34201b;
-    display:flex; flex-direction:column; align-items:center; justify-content:center; padding:22px; }
-  .table:before { content:""; position:absolute; inset:12px; border:2px solid #c28a4d55; border-radius:50%; }
-  .round-title { z-index:1; font-size:clamp(20px,3vw,30px); text-align:center; font-weight:900; color:#ffe5aa; }
-  .sub { z-index:1; color:#f7c88c; text-align:center; margin-top:8px; }
-  .cups { z-index:1; display:flex; flex-wrap:wrap; justify-content:center; gap:14px; margin:26px 0; }
-  .cup { font-size:clamp(40px,7vw,68px); filter:drop-shadow(0 6px 2px #24120c); }
-  .players { z-index:1; display:flex; flex-wrap:wrap; justify-content:center; gap:9px; max-width:700px; }
-  .player { background:#21161de8; border:1px solid #c18b54; border-radius:14px; padding:9px 14px; text-align:center; min-width:90px; }
-  .player strong { display:block; color:#ffe4a6; }
-  .player small { color:#cbb8a1; }
-  h2 { margin:0 0 14px; font-size:19px; color:var(--gold); }
-  .status { padding:14px; background:#151219; border-radius:14px; border:1px solid #51404a; min-height:88px; line-height:1.45; }
-  .status b { color:#ffdb80; }
-  .controls { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px; }
-  button { cursor:pointer; border:0; border-radius:12px; padding:12px 14px; font-weight:800; font-size:14px; color:#21151a;
-    background:linear-gradient(#ffe08c,#eeb34e); box-shadow:0 3px #8d5529; transition:transform .08s; }
-  button:active { transform:translateY(2px); box-shadow:0 1px #8d5529; }
-  button.alt { background:linear-gradient(#ff8b75,#df443b); color:#fff; box-shadow:0 3px #822c28; }
-  button.dark { background:#37303b; color:#f7e8d0; box-shadow:0 3px #17121a; border:1px solid #665361; }
-  button.green { background:linear-gradient(#9be8b5,#55bc81); box-shadow:0 3px #287449; }
-  input { width:100%; border-radius:10px; border:1px solid #6b5360; padding:11px 12px; background:#151219; color:#fff4df; margin:0 0 9px; font:inherit; }
-  .scoreboard { display:flex; flex-direction:column; gap:8px; margin-top:14px; max-height:210px; overflow:auto; }
-  .score { display:flex; align-items:center; justify-content:space-between; gap:8px; background:#17131b; padding:10px 12px; border-radius:10px; border:1px solid #42333f; }
-  .score span { color:#ffdf9a; font-weight:800; }
-  .score small { color:#c5b6c7; }
-  .footer { color:#b9a9b4; font-size:12px; margin:16px 2px 0; line-height:1.5; }
-  .toast { color:#d4ffdf; margin-top:10px; min-height:20px; font-size:13px; }
-  @media(max-width:800px) { .layout{grid-template-columns:1fr} .table{min-height:330px} .wrap{padding:14px} }
-</style>
-</head>
-<body>
-<div class="wrap">
-  <header>
-    <div class="brand">🍻 HỘI NHẬU ONLINE</div>
-    <div class="tag">MINI GAME DÀNH CHO TIKTOK LIVE · CHỈ NHẬU ẢO</div>
-  </header>
-  <div class="layout">
-    <main class="panel">
-      <div class="table">
-        <div class="round-title" id="roundTitle">BÀN NHẬU ĐÃ LÊN ĐÈN!</div>
-        <div class="sub" id="roundSub">Thêm tên người chơi rồi bấm “Bắt đầu kèo”</div>
-        <div class="cups" id="cups"><span class="cup">🍺</span><span class="cup">🥜</span><span class="cup">🍻</span></div>
-        <div class="players" id="playerSeats"></div>
-      </div>
-      <div class="controls">
-        <button class="green" id="startBtn">▶ BẮT ĐẦU KÈO</button>
-        <button id="challengeBtn">🎲 BỐC THỬ THÁCH</button>
-        <button class="alt" id="toastBtn">🍻 CỤNG LY ẢO</button>
-        <button class="dark" id="resetBtn">↻ KÈO MỚI</button>
-      </div>
-      <div class="toast" id="toast" aria-live="polite"></div>
-    </main>
-    <aside class="panel">
-      <h2>🪑 Thêm người vào bàn</h2>
-      <input id="playerName" maxlength="22" placeholder="Tên viewer / biệt danh...">
-      <button class="green" id="addBtn" style="width:100%">＋ THÊM NGƯỜI CHƠI</button>
-      <div class="scoreboard" id="scoreboard"></div>
-      <div style="height:1px;background:#51404a;margin:18px 0"></div>
-      <h2>🎤 Nội dung kèo</h2>
-      <div class="status" id="challengeText">Bấm “Bốc thử thách” để lấy một câu vui cho bàn nhậu.</div>
-      <div class="controls">
-        <button class="dark" id="nextBtn">Người tiếp theo →</button>
-        <button class="dark" id="removeBtn">− Xóa người cuối</button>
-      </div>
-      <p class="footer">Game dùng điểm và hiệu ứng “cụng ly” ảo. Không cần uống đồ có cồn — có thể thay bằng nước lọc, nước ngọt hoặc chỉ chơi vui.</p>
-    </aside>
-  </div>
-  <p class="footer">OBS: thêm bằng Browser Source (URL GitHub Pages), đặt khung 1280×720 hoặc 1920×1080. Dùng nút điều khiển trong trang để host game khi livestream.</p>
+:root{--bg:#101629;--gold:#ffd166;--muted:#b9c5df;--line:#405477}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#2b3b63,#101629 68%);color:#f7f8ff;font-family:system-ui,Segoe UI,sans-serif}header{text-align:center;padding:16px 10px 5px}h1{margin:0;color:var(--gold);font-size:clamp(22px,5vw,36px)}header p{margin:5px;color:var(--muted);font-size:13px}main{max-width:1150px;margin:auto;padding:10px 12px 28px}.top,.tabs,.actions{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:10px}.pill{background:#263657;border:1px solid var(--line);padding:7px 12px;border-radius:22px;font-size:13px;font-weight:800}button{cursor:pointer}.tab,.btn,.mini{border:0;border-radius:9px;font-weight:800}.tab{padding:9px 13px;background:#34496e;color:white}.tab.active,.btn{background:var(--gold);color:#30220a}.btn{padding:10px 14px}.btn.alt,.mini.alt{background:#40577f;color:white}.btn:disabled,.mini:disabled{opacity:.4;cursor:not-allowed}.panel{background:#17223d;border:1px solid var(--line);border-radius:15px;padding:12px;margin:11px 0}.arena{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;text-align:center}.portrait{font-size:35px}.bar{height:9px;background:#512d40;border-radius:20px;overflow:hidden;max-width:210px;margin:6px auto}.bar span{height:100%;display:block;background:linear-gradient(90deg,#ff5576,#ffb16b)}.muted,.hint{font-size:11px;color:var(--muted)}.vs{color:var(--gold);font-weight:1000}.battlefields{display:grid;grid-template-columns:1fr 1fr;gap:10px}.side-title{text-align:center;font-weight:900;margin-bottom:7px}.formation{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.unit{background:linear-gradient(145deg,#354a73,#202b49);border:1px solid #627aa8;border-radius:10px;padding:7px 3px;text-align:center;min-height:82px;font-size:11px}.unit.dead{opacity:.3;filter:grayscale(1)}.unit .uicon{font-size:24px}.unit small{display:block;color:#d1dbef;font-size:10px}.formation-label{text-align:center;font-size:10px;color:var(--muted);margin:6px}.grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}.hero{background:linear-gradient(150deg,#394d78,#202b49);border:2px solid #627aa8;border-radius:12px;padding:8px 5px;text-align:center;min-width:0}.hero.selected{border-color:var(--gold)}.hero.locked{opacity:.65}.hero .icon{font-size:30px}.upgrade-list{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-top:7px;padding-top:7px;border-top:1px solid #ffffff30}.upgrade-title{grid-column:1/-1;font-size:9px;color:var(--gold);font-weight:900;margin:2px}.upgrade-list .mini{font-size:9px;padding:6px 2px;min-height:32px}.hero h3{font-size:12px;margin:2px}.rarity{font-size:9px;color:var(--gold);font-weight:900}.level{font-size:10px;background:#17223d;border-radius:15px;padding:3px 6px;display:inline-block;margin:3px}.details{font-size:10px;color:#d3dcf0;line-height:1.5;min-height:45px}.mini{padding:6px 7px;margin:2px;background:#f4c75e;color:#2b210c;font-size:10px}.log{max-height:100px;overflow:auto;background:#111a2e;border:1px solid var(--line);border-radius:11px;padding:8px;font-size:11px;color:#cbd5eb}.log div{padding:3px;border-bottom:1px solid #fff1}.status{text-align:center;color:var(--muted);font-size:12px;min-height:19px}.overlay{position:fixed;inset:0;background:#080d1be8;display:none;place-items:center;padding:18px;z-index:5}.overlay.show{display:grid}.modal{max-width:390px;width:100%;background:#202d4d;border:2px solid var(--gold);border-radius:18px;padding:22px;text-align:center}.modal h2{color:var(--gold)}@media(max-width:760px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.battlefields{gap:5px}.unit{min-height:72px;padding:5px 1px}.unit .uicon{font-size:21px}}
+.setting-label{display:block;font-weight:900;margin:14px 0 6px;color:var(--gold)}input[type=file]{display:block;width:100%;padding:10px;background:#263657;border:1px solid var(--line);border-radius:9px;color:white}.preview{height:125px;margin-top:7px;border:1px dashed #8295b8;border-radius:10px;display:grid;place-items:center;color:var(--muted);background-size:cover;background-position:center;font-size:12px}.view#settings{max-width:800px;margin:auto}
+.editInput{width:100%;padding:9px;border-radius:8px;border:1px solid #627aa8;background:#263657;color:white}.heroArt{width:100%;height:120px;object-fit:cover;border-radius:8px}.unit img{width:54px;height:54px;object-fit:cover;border-radius:8px}.preview img{max-height:115px;max-width:100%;object-fit:contain}.mediaVideo{width:100%;max-height:180px;border-radius:10px}@keyframes pulseGlow{0%,100%{filter:drop-shadow(0 0 2px #ffd166)}50%{filter:drop-shadow(0 0 13px #ff8c42)}}.hero.selected{animation:pulseGlow 2.4s infinite}.unit{transition:transform .25s,filter .25s}.unit:hover{transform:translateY(-3px)}
+/* Hiệu ứng kỹ năng có thể chọn trong Xưởng */
+.fx-layer{position:fixed;inset:0;pointer-events:none;z-index:20;display:grid;place-items:center}.fx-burst{font-size:clamp(58px,15vw,130px);filter:drop-shadow(0 0 20px #fff);animation:fxPop .85s ease-out forwards}.fx-fire{filter:drop-shadow(0 0 24px #ff5b18)}.fx-lightning{filter:drop-shadow(0 0 24px #8deaff)}.fx-ice{filter:drop-shadow(0 0 24px #8ceaff)}.fx-heal{filter:drop-shadow(0 0 24px #62ff9b)}.fx-dark{filter:drop-shadow(0 0 24px #bd72ff)}@keyframes fxPop{0%{transform:scale(.15) rotate(-20deg);opacity:0}35%{transform:scale(1.25) rotate(8deg);opacity:1}100%{transform:scale(1.7) rotate(0);opacity:0}}@keyframes unitLunge{0%,100%{transform:translateX(0)}35%{transform:translateX(18px) scale(1.08)}70%{transform:translateX(-4px)}}@keyframes unitCast{0%,100%{transform:translateY(0) scale(1)}35%{transform:translateY(-13px) scale(1.08)}70%{transform:translateY(3px)}}@keyframes unitShake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}.unit.motion-lunge{animation:unitLunge .55s ease}.unit.motion-cast{animation:unitCast .65s ease}.unit.motion-shake{animation:unitShake .45s ease}.sound-preview{width:100%;margin-top:8px}.workshop-note{padding:9px;background:#263657;border-radius:9px;font-size:11px;color:#dbe6ff}
+
+/* PREMIUM WAR ROOM UI */
+:root{--bg:#090d16;--gold:#e7bd70;--muted:#aeb8c9;--line:#39465b;--panel:#121b2b}
+body{background:radial-gradient(ellipse at 50% -20%,#3b2d22 0,#141b29 38%,#080c14 78%);font-family:Inter,system-ui,"Segoe UI",sans-serif;letter-spacing:.1px}
+header{max-width:1440px;margin:0 auto;padding:22px 18px 12px;text-align:left;display:flex;align-items:end;justify-content:space-between;gap:16px;border-bottom:1px solid #c69b5433}
+h1{color:#f0d39a;letter-spacing:1.5px;text-shadow:0 3px 20px #d79b4433;font-size:clamp(23px,3vw,36px)}
+header p{color:#9caac0;text-align:right;font-size:12px;letter-spacing:1px;text-transform:uppercase}
+main{max-width:1440px;padding:14px 20px 36px}
+.top{justify-content:flex-start;margin:12px 0 16px}
+.pill{background:linear-gradient(135deg,#1c293b,#111927);border:1px solid #8e744a77;color:#e7d5b2;border-radius:7px;padding:9px 14px;box-shadow:inset 0 1px #ffffff0b}
+.tabs{justify-content:flex-start;margin:0 0 16px;padding:7px;background:#0b111c;border:1px solid #344056;border-radius:10px}
+.tab,.btn,.mini{border-radius:6px;letter-spacing:.3px}
+.tab{background:transparent;color:#aebbd0;border:1px solid transparent;padding:10px 16px}
+.tab.active{background:linear-gradient(135deg,#b58b4c,#e7c77e);color:#17120b;border-color:#f1d99b;box-shadow:0 4px 18px #d8a9572c}
+.btn{background:linear-gradient(135deg,#c69a54,#f0d08b);color:#20170b;border:1px solid #f5dca4;padding:11px 17px;box-shadow:0 5px 16px #0005}
+.btn.alt,.mini.alt{background:linear-gradient(135deg,#27364c,#192538);color:#d8e1ef;border:1px solid #52647d}
+.panel{background:linear-gradient(145deg,#172235f2,#0f1725f5);border:1px solid #52627a66;border-radius:11px;padding:16px;box-shadow:0 12px 34px #0003,inset 0 1px #ffffff09}
+.arena{grid-template-columns:1fr auto 1fr;min-height:130px;background:linear-gradient(110deg,#1b2c40,#111a29 48%,#301d27)}
+.arena .portrait{font-size:42px;filter:drop-shadow(0 5px 10px #0009)}
+.vs{font-size:20px;color:#e8c27a;text-shadow:0 0 15px #e8b85a66}
+.battlefields{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.battlefields>div{background:linear-gradient(150deg,#17283a,#101827);border:1px solid #52627a88;border-radius:9px;padding:12px}
+.battlefields>div:last-child{background:linear-gradient(150deg,#321e2a,#171724)}
+.side-title{letter-spacing:1.2px;color:#e2c58c}
+.formation{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.unit{min-height:122px;padding:10px 5px;background:linear-gradient(145deg,#344a60,#1a2638);border:1px solid #8da2b777;border-radius:8px;box-shadow:inset 0 1px #ffffff18,0 7px 16px #0003}
+#enemyField .unit{background:linear-gradient(145deg,#563340,#261d2a);border-color:#bd7a7a88}
+.unit .uicon{font-size:30px;margin-bottom:6px}
+.unit img{width:72px;height:72px;object-fit:cover;border:1px solid #d8bd7b66;box-shadow:0 4px 14px #0007}
+.grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:11px}
+.hero{background:linear-gradient(150deg,#26364d,#141e2e);border:1px solid #71839a88;border-radius:8px;padding:11px 8px;box-shadow:0 8px 18px #0003}
+.hero.selected{border:1px solid #e7bd70;box-shadow:0 0 0 1px #e7bd7044,0 0 22px #e7bd7022}
+.hero .icon{font-size:34px}
+.hero h3{font-size:13px;color:#f0dfbd}
+.setting-label{color:#e6c27d;letter-spacing:.35px}
+.editInput,select.editInput{background:#101a29;border:1px solid #52647c;color:#e7edf6}
+input[type=file]{background:#111b2a;border:1px solid #45566e}
+.preview{background-color:#0c1421;border-color:#9a8357}
+.log{background:#090f19;border-color:#43536b;max-height:180px}
+.status{color:#d5c49f}
+@media(max-width:760px){header{display:block;text-align:center}header p{text-align:center}.battlefields{grid-template-columns:1fr 1fr;gap:6px}.formation{gap:4px}.unit{min-height:90px}.unit img{width:52px;height:52px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}main{padding:10px}.tabs{justify-content:center}.tab{padding:9px 10px;font-size:11px}}
+
+/* Command deck + polished horizontal battlefield */
+.skill-command-panel{margin-top:15px;padding:13px;background:linear-gradient(120deg,#0c1420,#182538);border:1px solid #9d7d4b66;border-radius:9px}
+.skill-command-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;color:#e9cb91}
+.skill-command-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.skill-command{display:flex;gap:9px;align-items:center;min-width:0;padding:9px;background:#0b1320;border:1px solid #40516a;border-radius:8px}
+.skill-command-avatar{width:48px;height:48px;flex:0 0 48px;display:grid;place-items:center;font-size:27px;background:#27384c;border:1px solid #9e8255;border-radius:7px;overflow:hidden}
+.skill-command-avatar img{width:100%;height:100%;object-fit:cover}
+.skill-command-info{min-width:0;flex:1;display:grid;gap:3px}
+.skill-command-info b{font-size:12px;color:#f1dfbc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.skill-command-info small{font-size:10px;color:#9eacc0}
+.skill-command-info select{width:100%;min-width:0;padding:6px;background:#172538;border:1px solid #6b7890;border-radius:5px;color:#f0dfbd;font-size:11px}
+.skill-meta{color:#d9b979!important}
+.skill-studio{border-color:#9b7b4d99}
+.skill-studio h3{margin:0;color:#efd49d;letter-spacing:1px}
+@media(max-width:760px){.skill-command-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.skill-command-head{display:block}.skill-command-head .muted{display:block;margin-top:4px}.skill-command{padding:6px;gap:6px}.skill-command-avatar{width:38px;height:38px;flex-basis:38px}}
+@media(max-width:420px){.skill-command-grid{grid-template-columns:1fr}.battlefields{grid-template-columns:1fr 1fr}.unit{font-size:9px}.unit img{width:45px;height:45px}}
+
+/* FINAL ART + PROCEDURAL COMBAT VFX */
+#battle>.panel:nth-of-type(2){overflow:hidden}
+#battle .battlefields{position:relative;isolation:isolate;background-image:linear-gradient(90deg,#07111bd9,#07111b88 48%,#180c16c9),url('assets/battlefield.webp');background-size:cover;background-position:center 54%;border:1px solid #b18b4b77;border-radius:10px;padding:12px;min-height:300px;box-shadow:inset 0 0 55px #02050bd9,0 10px 25px #0006}
+#battle .battlefields>div{background:linear-gradient(145deg,#0c1729c9,#0b111dc9);backdrop-filter:blur(2px);border-color:#b9a06a66}
+#battle .battlefields>div:last-child{background:linear-gradient(145deg,#29131dc9,#100e19d9)}
+#battle .unit{background:linear-gradient(145deg,#243c54df,#101c2bdf);border-color:#d6bd8066;min-height:108px}
+#battle #enemyField .unit{background:linear-gradient(145deg,#542936e8,#21131ee8);border-color:#ce777766}
+#battle .unit img{object-fit:cover}
+.skill-command{box-shadow:inset 0 1px #ffffff0b,0 5px 14px #0004}
+.fx-canvas{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:30}
+.fx-flash{position:fixed;inset:0;z-index:29;pointer-events:none;animation:fxFlash .45s ease-out forwards}
+@keyframes fxFlash{0%{opacity:.0}18%{opacity:.22}100%{opacity:0}}
+.damage-float{position:fixed;z-index:31;pointer-events:none;font-size:clamp(25px,5vw,48px);font-weight:1000;color:#ffe08a;text-shadow:0 3px 0 #762b13,0 0 18px #ff9c39;animation:damageFloat 1s ease-out forwards}
+@keyframes damageFloat{0%{opacity:0;transform:translateY(18px) scale(.5)}20%{opacity:1;transform:translateY(0) scale(1.2)}100%{opacity:0;transform:translateY(-85px) scale(.85)}}
+@media(max-width:760px){#battle .battlefields{min-height:245px;padding:7px;background-position:center}#battle .battlefields>div{padding:7px}#battle .unit{min-height:88px}}
+
+</style></head><body>
+<header><h1>⚔️ ĐẠI CHIẾN 50 TƯỚNG — 6 VS 6</h1><p>Đấu trường giả tưởng · 50 tướng · 6v6 · Kỹ năng và hiệu ứng tùy chỉnh</p></header><main>
+<div class="top"><div class="pill">🪙 Vàng: <span id="gold">300</span></div><div class="pill">💎 Ngọc: <span id="gems">12</span></div><div class="pill">🏆 Thắng: <span id="wins">0</span></div><div class="pill">🃏 Sở hữu: <span id="owned">1</span>/50</div></div>
+<div class="tabs"><button class="tab active" data-tab="battle">⚔️ Đấu trường 6v6</button><button class="tab" data-tab="heroes">🃏 50 tướng</button><button class="tab" data-tab="summon">✨ Triệu hồi</button><button class="tab" data-tab="settings">⚙️ Tùy chỉnh</button><button class="tab" data-tab="workshop">🧰 Xưởng thiết kế</button></div>
+<section id="battle" class="view">
+<div class="panel arena"><div><div class="portrait">🛡️</div><b>Đội của bạn</b><div class="bar"><span id="pbar" style="width:100%"></span></div><div class="muted">❤️ <span id="php">0</span>/<span id="pmax">0</span></div></div><div class="vs">VS</div><div><div class="portrait">🐲</div><b>Đội đối thủ</b><div class="bar"><span id="bbar" style="width:100%"></span></div><div class="muted">❤️ <span id="bhp">0</span>/<span id="bmax">0</span></div></div></div>
+<div class="panel"><b>Chiến trường 6v6</b><div class="battlefields"><div><div class="side-title">🔵 PHE BẠN</div><div class="formation" id="myField"></div><div class="formation-label">Hàng trước → Hàng sau</div></div><div><div class="side-title">🔴 ĐỐI THỦ</div><div class="formation" id="enemyField"></div><div class="formation-label">Hàng trước → Hàng sau</div></div></div><div class="skill-command-panel"><div class="skill-command-head"><b>⚔️ BẢNG CHỌN KỸ NĂNG ĐỘI HÌNH</b><span class="muted">Chọn riêng chiêu cho từng tướng trước khi ra lệnh</span></div><div id="skillCommands" class="skill-command-grid"></div></div></div>
+<div class="panel"><b>Đội hình của bạn — chọn tối đa 6 tướng</b><div class="status" id="teamCount"></div><p class="hint">Trong Bộ sưu tập, bấm “Đưa vào đội” để chọn tướng. Kéo chiến thuật bằng cách chọn sơ đồ bên dưới.</p>
+<div class="actions"><button class="tab active" data-formation="balanced">⚖️ Cân bằng 2-2-2</button><button class="tab" data-formation="front">🛡️ Phòng thủ 3-2-1</button><button class="tab" data-formation="assault">⚔️ Tấn công 1-2-3</button></div>
+<div class="status" id="formationText">Cân bằng: 2 trước, 2 giữa, 2 sau.</div>
+<div class="actions"><button class="btn" id="attack">✨ Cả đội dùng kỹ năng</button><button class="btn alt" id="end">Kết thúc lượt ↪</button><button class="btn alt" id="newBattle">Trận mới ⟲</button></div></div>
+<div class="panel"><b>📜 Nhật ký chiến đấu</b><div class="log" id="log"><div>Chào mừng đến đấu trường 6v6!</div></div></div></section>
+<section id="heroes" class="view" style="display:none"><div class="panel"><b>50 vị tướng</b> <span class="hint">— vai trò, nguyên tố, kỹ năng và độ hiếm riêng</span><div class="grid" id="heroGrid" style="margin-top:10px"></div></div></section>
+<section id="summon" class="view" style="display:none"><div class="panel" style="text-align:center"><div style="font-size:45px">🔮</div><h2>Triệu hồi tướng</h2><p class="muted">3 ngọc/lần. Tướng chưa sở hữu có tỷ lệ xuất hiện cao hơn.</p><button class="btn" id="summonBtn">Triệu hồi · 3 💎</button><p id="summonResult" class="status"></p></div></section>
+<section id="settings" class="view" style="display:none">
+<div class="panel"><h2>⚙️ CÀI ĐẶT & TÙY CHỈNH GAME</h2>
+<p class="hint">Tải ảnh từ điện thoại hoặc máy tính để thay nền. Ảnh được lưu trên trình duyệt của thiết bị này.</p>
+<label class="setting-label">🌌 Ảnh nền toàn bộ trò chơi</label><input type="file" id="bgUpload" accept="image/*">
+<div class="preview" id="bgPreview">Chưa chọn ảnh nền</div>
+<label class="setting-label">⚔️ Ảnh nền riêng chiến trường</label><input type="file" id="arenaUpload" accept="image/*">
+<div class="preview" id="arenaPreview">Chưa chọn ảnh chiến trường</div>
+<div class="actions"><button class="btn alt" id="resetBackgrounds">↩ Khôi phục nền mặc định</button></div>
+<p class="hint">Mẹo: dùng ảnh ngang 16:9 để nền đẹp hơn. Ảnh sẽ được tự thu nhỏ để tránh chiếm quá nhiều dung lượng.</p>
+</div></section>
+<section id="workshop" class="view" style="display:none">
+<div class="panel"><h2>🧰 XƯỞNG THIẾT KẾ TƯỚNG & GAMEPLAY</h2><p class="hint">Chọn tướng để thay ảnh, đổi thông tin, tạo ngoại hình theo mốc cấp, gắn GIF/video hiệu ứng và lưu cấu hình ngay trên thiết bị.</p>
+<label class="setting-label">Chọn tướng cần chỉnh sửa</label><select id="editHero" style="width:100%;padding:10px;border-radius:8px;background:#263657;color:white"></select>
+<div id="heroEditPreview" class="preview">Xem trước nhân vật</div><div id="heroMediaPreview" class="panel" style="margin-top:8px">Chưa có GIF/video tùy chỉnh</div>
+<div class="grid" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:10px">
+<div><label class="setting-label">Tên tướng</label><input id="edName" class="editInput"></div><div><label class="setting-label">Biểu tượng dự phòng</label><input id="edIcon" class="editInput"></div>
+<div><label class="setting-label">Nguyên tố</label><input id="edElement" class="editInput"></div><div><label class="setting-label">Vai trò</label><select id="edRole" class="editInput"><option>Đấu sĩ</option><option>Pháp sư</option><option>Hỗ trợ</option><option>Sát thủ</option><option>Đỡ đòn</option></select></div>
+<div><label class="setting-label">Tên kỹ năng</label><input id="edSkill" class="editInput"></div><div><label class="setting-label">Loại kỹ năng</label><select id="edKind" class="editInput"><option value="attack">Tấn công</option><option value="heal">Hồi máu</option><option value="shield">Hộ thuẫn</option></select></div>
+<div><label class="setting-label">Độ hiếm</label><select id="edRarity" class="editInput"><option>Thường</option><option>Hiếm</option><option>Sử thi</option><option>Huyền thoại</option><option>Thần thoại</option></select></div><div><label class="setting-label">Cấp hiện tại (1–100)</label><input id="edLevel" class="editInput" type="number" min="1" max="100"></div>
+<div><label class="setting-label">Máu cơ bản</label><input id="edHp" class="editInput" type="number" min="1"></div><div><label class="setting-label">Công cơ bản</label><input id="edAtk" class="editInput" type="number" min="1"></div>
+<div><label class="setting-label">Hệ số kỹ năng</label><input id="edPower" class="editInput" type="number" min="0.1" step="0.1"></div>
 </div>
+
+<div class="panel skill-studio">
+<h3>⚔️ XƯỞNG KỸ NĂNG — THIẾT KẾ RIÊNG TỪNG CHIÊU</h3>
+<p class="hint">Mỗi tướng có thể có 4 ô kỹ năng. Chọn ô để đặt tên, sát thương/hệ số, hiệu ứng hình ảnh, chuyển động và âm thanh độc lập.</p>
+<label class="setting-label">Ô kỹ năng đang chỉnh sửa</label>
+<select id="skillSlot" class="editInput"><option value="0">Kỹ năng 1 · Đòn cơ bản</option><option value="1">Kỹ năng 2 · Tuyệt kỹ</option><option value="2">Kỹ năng 3 · Nội tại / hỗ trợ</option><option value="3">Kỹ năng 4 · Chiêu thức tối thượng</option></select>
+<div class="grid" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:8px">
+<div><label class="setting-label">Tên kỹ năng</label><input id="skName" class="editInput" placeholder="Tên chiêu thức"></div>
+<div><label class="setting-label">Hệ số sức mạnh</label><input id="skPower" class="editInput" type="number" min="0.1" step="0.1" value="1.5"></div>
+<div><label class="setting-label">Loại kỹ năng</label><select id="skKind" class="editInput"><option value="attack">Sát thương</option><option value="heal">Hồi máu</option><option value="shield">Tạo khiên</option></select></div>
+<div><label class="setting-label">Chuyển động</label><select id="skMotion" class="editInput"><option value="lunge">Lao tới / chém</option><option value="cast">Bay lên / niệm phép</option><option value="shake">Rung chấn / va đập</option><option value="none">Không chuyển động</option></select></div>
+<div><label class="setting-label">Hiệu ứng hình ảnh</label><select id="skEffect" class="editInput"><option value="auto">Tự theo nguyên tố</option><option value="fire">Bùng nổ lửa</option><option value="lightning">Sét đánh</option><option value="ice">Băng vỡ</option><option value="heal">Ánh sáng hồi phục</option><option value="dark">Hắc ám</option><option value="slash">Kiếm khí</option><option value="none">Không hiệu ứng</option></select></div>
+<div><label class="setting-label">Màu hiệu ứng / ánh sáng</label><input id="skColor" class="editInput" type="color" value="#e7bd70"></div>
+</div>
+<label class="setting-label">🎞️ GIF / WebP động riêng cho chiêu này</label><input id="skGif" type="file" accept="image/gif,image/webp">
+<label class="setting-label">🔊 Âm thanh riêng cho chiêu này</label><input id="skSound" type="file" accept="audio/*">
+<audio id="skSoundPreview" controls style="display:none;width:100%;margin-top:8px"></audio>
+<div class="actions"><button class="btn alt" id="previewSkill">▶ Xem thử kỹ năng</button><button class="btn" id="saveSkill">💾 Lưu kỹ năng này</button></div>
+<div id="skillStatus" class="status"></div>
+</div>
+<label class="setting-label">🖼️ Ảnh chân dung / ảnh nhân vật chính</label><input type="file" id="heroPortrait" accept="image/*"><p class="hint">Ảnh tĩnh PNG/JPG/WebP. Nên dùng ảnh nhân vật nền trong suốt hoặc ảnh dọc.</p>
+<label class="setting-label">🌟 Ngoại hình tiến hóa theo cấp độ</label><p class="hint">Tải ảnh riêng cho các mốc. Game tự hiển thị ảnh mốc cao nhất mà tướng đã đạt.</p>
+<div class="grid" style="grid-template-columns:repeat(2,minmax(0,1fr))"><div><label class="setting-label">Cấp 10 — thức tỉnh sơ cấp</label><input type="file" id="stage10" accept="image/*"></div><div><label class="setting-label">Cấp 30 — tiến hóa I</label><input type="file" id="stage30" accept="image/*"></div><div><label class="setting-label">Cấp 50 — tiến hóa II</label><input type="file" id="stage50" accept="image/*"></div><div><label class="setting-label">Cấp 70 — dạng tối thượng</label><input type="file" id="stage70" accept="image/*"></div><div><label class="setting-label">Cấp 90 — dạng thần thoại</label><input type="file" id="stage90" accept="image/*"></div></div>
+<label class="setting-label">🎞️ GIF động / hiệu ứng kỹ năng</label><input type="file" id="heroGif" accept="image/gif,image/webp"><p class="hint">GIF/WebP động dùng làm hình kỹ năng hoặc hiệu ứng trình diễn. Dung lượng khuyến nghị dưới 1 MB.</p>
+<label class="setting-label">🎬 Video giới thiệu / hiệu ứng tướng (MP4/WebM)</label><input type="file" id="heroVideo" accept="video/mp4,video/webm"><p class="hint">Video lưu trong bộ nhớ trình duyệt; nên dưới 3 MB. Trên điện thoại yếu, video lớn có thể làm game chậm.</p>
+<div class="panel"><h3>✨ Tùy chỉnh chuyển động & hiệu ứng chiêu thức</h3>
+<label class="setting-label">Hiệu ứng kỹ năng</label><select id="edEffect" class="editInput"><option value="auto">Tự chọn theo nguyên tố</option><option value="fire">🔥 Bùng nổ lửa</option><option value="lightning">⚡ Sét giật</option><option value="ice">❄️ Băng vỡ</option><option value="heal">💚 Ánh sáng hồi phục</option><option value="dark">🌑 Hắc ám</option><option value="slash">🗡️ Kiếm khí</option><option value="none">Không hiệu ứng</option></select>
+<label class="setting-label">Chuyển động khi thi triển</label><select id="edMotion" class="editInput"><option value="lunge">Lao lên tấn công</option><option value="cast">Nhảy / niệm phép</option><option value="shake">Rung chấn</option><option value="none">Không chuyển động</option></select>
+<label class="setting-label">🔊 Âm thanh riêng cho kỹ năng (MP3, WAV, OGG)</label><input type="file" id="heroSound" accept="audio/*"><audio id="soundPreview" class="sound-preview" controls style="display:none"></audio><p class="hint">Tải âm thanh hiệu ứng riêng cho từng tướng. Nên dùng file ngắn 1–5 giây, dưới 1.5 MB.</p>
+<div class="workshop-note">Khi tướng dùng chiêu, game sẽ phát hiệu ứng hình ảnh, chuyển động và âm thanh đã chọn. Âm thanh cần được người chơi bật tương tác lần đầu trên trình duyệt.</div>
+</div>
+<div class="actions"><button class="btn" id="saveHeroEdit">💾 Lưu thay đổi tướng</button><button class="btn alt" id="resetHeroMedia">↩ Xóa media tùy chỉnh của tướng</button></div><div class="status" id="editStatus"></div></div>
+<div class="panel"><h3>🧪 Bộ chỉnh luật chơi</h3><p class="hint">Các thay đổi áp dụng ngay cho trận kế tiếp.</p><label class="setting-label">Sát thương toàn đội (%)</label><input id="damageScale" type="range" min="50" max="300" value="100" style="width:100%"><span id="damageValue">100%</span><label class="setting-label">Máu đối thủ (%)</label><input id="enemyScale" type="range" min="50" max="300" value="100" style="width:100%"><span id="enemyValue">100%</span><label class="setting-label">Tốc độ hoạt ảnh</label><select id="animSpeed" class="editInput"><option value="1">Bình thường</option><option value="0.7">Chậm / điện ảnh</option><option value="1.5">Nhanh</option></select><div class="actions"><button class="btn" id="saveRules">Áp dụng luật chơi</button></div></div>
+<div class="panel"><h3>🔉 Âm lượng toàn game</h3><label class="setting-label">Âm lượng hiệu ứng</label><input id="gameVolume" type="range" min="0" max="100" value="70" style="width:100%"><span id="volumeValue">70%</span><p class="hint">Âm thanh riêng của tướng sẽ tuân theo mức âm lượng này. Chưa có nhạc nền mặc định; bạn có thể thêm nhạc nền ở bản mở rộng tiếp theo.</p></div>
+<div class="panel"><h3>📦 Sao lưu / chuyển game</h3><p class="hint">Xuất danh sách tướng và thông số thành JSON để backup hoặc chuyển thiết bị. Media ảnh/video sẽ được quản lý riêng để tránh file JSON quá nặng.</p><div class="actions"><button class="btn" id="exportData">⬇ Xuất dữ liệu tướng</button><label class="btn alt" style="cursor:pointer">⬆ Nhập dữ liệu JSON<input id="importData" type="file" accept="application/json" style="display:none"></label></div></div>
+</section>
+</main><div class="overlay" id="overlay"><div class="modal"><h2 id="result"></h2><p id="resultText"></p><button class="btn" onclick="startBattle()">Đánh trận tiếp theo</button></div></div>
 <script>
-const challenges = [
- "Kể một pha quê nhất trong 20 giây.",
- "Nói một câu thả thính mà không được cười.",
- "Ai từng ngủ quên trên xe? Kể nhanh!",
- "Đọc tên 3 món ăn vặt trong 5 giây.",
- "Bắt chước giọng người gọi món: “Cho thêm dĩa nữa!”",
- "Chọn một người và dành lời khen thật lòng.",
- "Nói một câu như tổng đài quán nhậu.",
- "Oẳn tù tì với người tiếp theo — thắng được 1 điểm.",
- "Kể một chuyện xui mà giờ nghĩ lại thấy mắc cười.",
- "Cả bàn cùng tạo dáng cụng ly ảo!"
-];
-let players = [], current = 0, started = false, challengeIndex = 0;
-const $ = id => document.getElementById(id);
-function render(){
-  $("playerSeats").innerHTML = players.map((p,i)=>`<div class="player"><strong>${escapeHtml(p.name)}${i===current && players.length ? " 👈":""}</strong><small>${p.points} điểm · ${p.toasts} cụng</small></div>`).join("");
-  $("scoreboard").innerHTML = players.map((p,i)=>`<div class="score"><div><span>${i+1}. ${escapeHtml(p.name)}</span><br><small>${p.toasts} lần cụng ly ảo</small></div><b>${p.points} ⭐</b></div>`).join("");
-  $("roundSub").textContent = players.length ? `${players.length} người trên bàn · Lượt: ${players[current]?.name || "—"}` : "Thêm tên người chơi rồi bấm “Bắt đầu kèo”";
+const base=[{"id":1,"name":"Lâm Phong","icon":"🗡️","element":"Kiếm","skill":"Kiếm Khí","power":1.8,"kind":"attack","role":"Đấu sĩ","rarity":"Thường","hp":90,"atk":11,"owned":true,"level":1,"xp":0},{"id":2,"name":"Hỏa Linh","icon":"🔥","element":"Hỏa","skill":"Hỏa Cầu","power":2.2,"kind":"attack","role":"Pháp sư","rarity":"Thường","hp":97,"atk":13,"owned":false,"level":1,"xp":0},{"id":3,"name":"Nguyệt Y","icon":"🌙","element":"Ánh Trăng","skill":"Nguyệt Quang","power":0.28,"kind":"heal","role":"Hỗ trợ","rarity":"Thường","hp":104,"atk":15,"owned":false,"level":1,"xp":0},{"id":4,"name":"Lôi Vũ","icon":"⚡","element":"Lôi","skill":"Thiên Lôi","power":2.5,"kind":"attack","role":"Sát thủ","rarity":"Thường","hp":111,"atk":17,"owned":false,"level":1,"xp":0},{"id":5,"name":"Thạch Sơn","icon":"🪨","element":"Đất","skill":"Thạch Giáp","power":0.32,"kind":"shield","role":"Đỡ đòn","rarity":"Thường","hp":118,"atk":19,"owned":false,"level":1,"xp":0},{"id":6,"name":"Băng Tâm","icon":"❄️","element":"Băng","skill":"Băng Phong","power":1.9,"kind":"attack","role":"Pháp sư","rarity":"Thường","hp":125,"atk":21,"owned":false,"level":1,"xp":0},{"id":7,"name":"Thanh Long","icon":"🐉","element":"Long","skill":"Long Uy","power":2.7,"kind":"attack","role":"Đấu sĩ","rarity":"Thường","hp":132,"atk":11,"owned":false,"level":1,"xp":0},{"id":8,"name":"Hắc Vũ","icon":"🦅","element":"Phong","skill":"Phong Nhận","power":2.1,"kind":"attack","role":"Sát thủ","rarity":"Thường","hp":90,"atk":13,"owned":false,"level":1,"xp":0},{"id":9,"name":"Mộc Nhi","icon":"🌿","element":"Mộc","skill":"Sinh Trưởng","power":0.25,"kind":"heal","role":"Hỗ trợ","rarity":"Thường","hp":97,"atk":15,"owned":false,"level":1,"xp":0},{"id":10,"name":"Dạ Ảnh","icon":"🥷","element":"Bóng Tối","skill":"Ảnh Sát","power":3.0,"kind":"attack","role":"Sát thủ","rarity":"Thường","hp":104,"atk":17,"owned":false,"level":1,"xp":0},{"id":11,"name":"Kim Giáp","icon":"🛡️","element":"Kim","skill":"Kim Thuẫn","power":0.4,"kind":"shield","role":"Đỡ đòn","rarity":"Thường","hp":111,"atk":19,"owned":false,"level":1,"xp":0},{"id":12,"name":"Hải Vương","icon":"🔱","element":"Thủy","skill":"Thủy Triều","power":2.3,"kind":"attack","role":"Đấu sĩ","rarity":"Thường","hp":118,"atk":21,"owned":false,"level":1,"xp":0},{"id":13,"name":"Phượng Hoàng","icon":"🦚","element":"Hỏa","skill":"Niết Bàn","power":0.34,"kind":"heal","role":"Hỗ trợ","rarity":"Thường","hp":125,"atk":11,"owned":false,"level":1,"xp":0},{"id":14,"name":"Bạch Hổ","icon":"🐅","element":"Thú","skill":"Hổ Trảo","power":2.6,"kind":"attack","role":"Đấu sĩ","rarity":"Thường","hp":132,"atk":13,"owned":false,"level":1,"xp":0},{"id":15,"name":"Tinh Linh","icon":"🧚","element":"Tinh Linh","skill":"Tinh Quang","power":0.3,"kind":"heal","role":"Hỗ trợ","rarity":"Thường","hp":90,"atk":15,"owned":false,"level":1,"xp":0},{"id":16,"name":"Ma Kiếm","icon":"⚔️","element":"Bóng Tối","skill":"Ma Trảm","power":2.8,"kind":"attack","role":"Đấu sĩ","rarity":"Hiếm","hp":108,"atk":19,"owned":false,"level":1,"xp":0},{"id":17,"name":"Thiên Sứ","icon":"😇","element":"Ánh Sáng","skill":"Thánh Ân","power":0.36,"kind":"heal","role":"Hỗ trợ","rarity":"Hiếm","hp":116,"atk":21,"owned":false,"level":1,"xp":0},{"id":18,"name":"Độc Vương","icon":"🐍","element":"Độc","skill":"Nọc Độc","power":2.4,"kind":"attack","role":"Pháp sư","rarity":"Hiếm","hp":124,"atk":23,"owned":false,"level":1,"xp":0},{"id":19,"name":"Cự Nhân","icon":"🗿","element":"Đất","skill":"Địa Chấn","power":2.2,"kind":"attack","role":"Đỡ đòn","rarity":"Hiếm","hp":132,"atk":12,"owned":false,"level":1,"xp":0},{"id":20,"name":"Hồn Sư","icon":"👻","element":"Linh Hồn","skill":"Hút Hồn","power":2.0,"kind":"attack","role":"Pháp sư","rarity":"Hiếm","hp":140,"atk":14,"owned":false,"level":1,"xp":0},{"id":21,"name":"Xích Diệm","icon":"🌋","element":"Hỏa","skill":"Dung Nham","power":2.9,"kind":"attack","role":"Pháp sư","rarity":"Hiếm","hp":147,"atk":16,"owned":false,"level":1,"xp":0},{"id":22,"name":"Băng Hồ","icon":"🦊","element":"Băng","skill":"Hàn Nguyệt","power":2.4,"kind":"attack","role":"Sát thủ","rarity":"Hiếm","hp":100,"atk":19,"owned":false,"level":1,"xp":0},{"id":23,"name":"Lôi Điểu","icon":"🦜","element":"Lôi","skill":"Lôi Vũ","power":2.5,"kind":"attack","role":"Sát thủ","rarity":"Hiếm","hp":108,"atk":21,"owned":false,"level":1,"xp":0},{"id":24,"name":"Thủy Linh","icon":"💧","element":"Thủy","skill":"Thủy Liệu","power":0.3,"kind":"heal","role":"Hỗ trợ","rarity":"Hiếm","hp":116,"atk":23,"owned":false,"level":1,"xp":0},{"id":25,"name":"Cuồng Chiến","icon":"🪓","element":"Chiến","skill":"Cuồng Nộ","power":3.1,"kind":"attack","role":"Đấu sĩ","rarity":"Hiếm","hp":124,"atk":12,"owned":false,"level":1,"xp":0},{"id":26,"name":"Ngân Vệ","icon":"🥈","element":"Kim","skill":"Ngân Thuẫn","power":0.38,"kind":"shield","role":"Đỡ đòn","rarity":"Hiếm","hp":132,"atk":14,"owned":false,"level":1,"xp":0},{"id":27,"name":"Sa Mạc","icon":"🐪","element":"Đất","skill":"Bão Cát","power":2.2,"kind":"attack","role":"Đấu sĩ","rarity":"Hiếm","hp":140,"atk":16,"owned":false,"level":1,"xp":0},{"id":28,"name":"Ảo Thuật","icon":"🎭","element":"Ảo Ảnh","skill":"Phân Thân","power":2.6,"kind":"attack","role":"Pháp sư","rarity":"Hiếm","hp":147,"atk":19,"owned":false,"level":1,"xp":0},{"id":29,"name":"Long Nữ","icon":"🐲","element":"Long","skill":"Long Tức","power":2.8,"kind":"attack","role":"Pháp sư","rarity":"Hiếm","hp":100,"atk":21,"owned":false,"level":1,"xp":0},{"id":30,"name":"Thần Y","icon":"🧑‍⚕️","element":"Ánh Sáng","skill":"Cứu Rỗi","power":0.4,"kind":"heal","role":"Hỗ trợ","rarity":"Hiếm","hp":108,"atk":23,"owned":false,"level":1,"xp":0},{"id":31,"name":"Huyết Ma","icon":"🩸","element":"Bóng Tối","skill":"Huyết Trảm","power":2.7,"kind":"attack","role":"Sát thủ","rarity":"Sử thi","hp":132,"atk":13,"owned":false,"level":1,"xp":0},{"id":32,"name":"Phong Hành","icon":"🌪️","element":"Phong","skill":"Lốc Xoáy","power":2.5,"kind":"attack","role":"Đấu sĩ","rarity":"Sử thi","hp":140,"atk":16,"owned":false,"level":1,"xp":0},{"id":33,"name":"Mặt Trời","icon":"☀️","element":"Ánh Sáng","skill":"Quang Diệm","power":2.8,"kind":"attack","role":"Pháp sư","rarity":"Sử thi","hp":149,"atk":19,"owned":false,"level":1,"xp":0},{"id":34,"name":"Mặt Trăng","icon":"🌕","element":"Ánh Trăng","skill":"Nguyệt Hộ","power":0.35,"kind":"shield","role":"Hỗ trợ","rarity":"Sử thi","hp":158,"atk":21,"owned":false,"level":1,"xp":0},{"id":35,"name":"Thiết Quyền","icon":"🥊","element":"Chiến","skill":"Long Quyền","power":2.6,"kind":"attack","role":"Đấu sĩ","rarity":"Sử thi","hp":167,"atk":24,"owned":false,"level":1,"xp":0},{"id":36,"name":"Hạt Giống","icon":"🌱","element":"Mộc","skill":"Nảy Mầm","power":0.32,"kind":"heal","role":"Hỗ trợ","rarity":"Sử thi","hp":114,"atk":26,"owned":false,"level":1,"xp":0},{"id":37,"name":"Hỏa Điểu","icon":"🐦‍🔥","element":"Hỏa","skill":"Hỏa Vũ","power":2.9,"kind":"attack","role":"Pháp sư","rarity":"Sử thi","hp":123,"atk":13,"owned":false,"level":1,"xp":0},{"id":38,"name":"Bóng Ma","icon":"💀","element":"Linh Hồn","skill":"Tử Khí","power":2.8,"kind":"attack","role":"Sát thủ","rarity":"Sử thi","hp":132,"atk":16,"owned":false,"level":1,"xp":0},{"id":39,"name":"Thần Sấm","icon":"🌩️","element":"Lôi","skill":"Lôi Thần Phạt","power":3.2,"kind":"attack","role":"Pháp sư","rarity":"Sử thi","hp":140,"atk":19,"owned":false,"level":1,"xp":0},{"id":40,"name":"Hải Long","icon":"🐳","element":"Thủy","skill":"Hải Long Kích","power":2.8,"kind":"attack","role":"Đấu sĩ","rarity":"Sử thi","hp":149,"atk":21,"owned":false,"level":1,"xp":0},{"id":41,"name":"Thánh Kỵ","icon":"🏇","element":"Ánh Sáng","skill":"Thánh Thuẫn","power":0.42,"kind":"shield","role":"Đỡ đòn","rarity":"Huyền thoại","hp":185,"atk":28,"owned":false,"level":1,"xp":0},{"id":42,"name":"Ma Cà Rồng","icon":"🧛","element":"Bóng Tối","skill":"Hút Máu","power":2.5,"kind":"attack","role":"Sát thủ","rarity":"Huyền thoại","hp":195,"atk":31,"owned":false,"level":1,"xp":0},{"id":43,"name":"Cổ Thụ","icon":"🌳","element":"Mộc","skill":"Rễ Cổ Thụ","power":0.38,"kind":"heal","role":"Hỗ trợ","rarity":"Huyền thoại","hp":133,"atk":16,"owned":false,"level":1,"xp":0},{"id":44,"name":"Thiên Hồ","icon":"🦄","element":"Thần Thú","skill":"Hồ Hỏa","power":3.0,"kind":"attack","role":"Pháp sư","rarity":"Huyền thoại","hp":143,"atk":19,"owned":false,"level":1,"xp":0},{"id":45,"name":"Hư Không","icon":"🌀","element":"Hư Không","skill":"Hư Vô","power":3.3,"kind":"attack","role":"Sát thủ","rarity":"Huyền thoại","hp":153,"atk":22,"owned":false,"level":1,"xp":0},{"id":46,"name":"Thần Long","icon":"🐲","element":"Long","skill":"Diệt Thế Long Tức","power":3.5,"kind":"attack","role":"Đấu sĩ","rarity":"Huyền thoại","hp":164,"atk":25,"owned":false,"level":1,"xp":0},{"id":47,"name":"Nữ Thần","icon":"👸","element":"Thần","skill":"Thần Quang","power":0.45,"kind":"heal","role":"Hỗ trợ","rarity":"Huyền thoại","hp":174,"atk":28,"owned":false,"level":1,"xp":0},{"id":48,"name":"Chiến Thần","icon":"🦾","element":"Thần","skill":"Phán Quyết","power":3.6,"kind":"attack","role":"Đấu sĩ","rarity":"Thần thoại","hp":218,"atk":36,"owned":false,"level":1,"xp":0},{"id":49,"name":"Vũ Trụ","icon":"🌌","element":"Vũ Trụ","skill":"Tinh Hà Bùng Nổ","power":3.8,"kind":"attack","role":"Pháp sư","rarity":"Thần thoại","hp":231,"atk":19,"owned":false,"level":1,"xp":0},{"id":50,"name":"Sáng Thế","icon":"✨","element":"Sáng Thế","skill":"Khởi Nguyên","power":0.5,"kind":"shield","role":"Hỗ trợ","rarity":"Thần thoại","hp":157,"atk":22,"owned":false,"level":1,"xp":0}];
+let heroes=base.map(h=>({...h,owned:h.id===1,level:1,xp:0})),teamIds=[1],battleSkillChoice={},gold=999999999999,gems=12,wins=0,bossLevel=1,formation='balanced',myHp=[],enemy=[],over=false,turn=1;
+const $=id=>document.getElementById(id),get=id=>heroes.find(h=>h.id===id);
+const layouts={balanced:[2,2,2],front:[3,2,1],assault:[1,2,3]};
+const mediaKey=id=>'heroMedia_'+id;
+function readMedia(id){try{return JSON.parse(localStorage.getItem(mediaKey(id))||'{}')}catch(e){return {}}}
+function currentArt(h){let m=readMedia(h.id),keys=[90,70,50,30,10];for(let k of keys)if(h.level>=k&&m['stage'+k])return m['stage'+k];return m.portrait||''}
+function skillFx(h){let m=readMedia(h.id),effect=m.effect||'auto',map={Hỏa:'fire',Lôi:'lightning',Băng:'ice',Thủy:'ice',Ánh:'heal',Mộc:'heal',Bóng:'dark',Kiếm:'slash',Chiến:'slash'};if(effect==='auto'){effect=Object.keys(map).find(k=>h.element.includes(k));effect=effect?map[effect]:'slash'}return effect}
+function playHeroSound(h){try{let m=readMedia(h.id);if(m.sound){let a=new Audio(m.sound);a.volume=Number(localStorage.getItem('gameVolume')||70)/100;a.play().catch(()=>{})}}catch(e){}}
+function playProceduralSkillSound(fx){
+ try{let C=window.AudioContext||window.webkitAudioContext;if(!C)return;let ctx=new C(),gain=ctx.createGain();gain.gain.value=(Number(localStorage.getItem('gameVolume')||70)/100)*.22;gain.connect(ctx.destination);let now=ctx.currentTime;
+ let osc=ctx.createOscillator(),og=ctx.createGain();osc.connect(og);og.connect(gain);osc.type=fx==='lightning'?'sawtooth':fx==='ice'?'triangle':'sine';osc.frequency.setValueAtTime(fx==='fire'?110:fx==='lightning'?900:fx==='ice'?1400:fx==='heal'?660:220,now);osc.frequency.exponentialRampToValueAtTime(fx==='lightning'?90:fx==='ice'?350:55,now+.42);og.gain.setValueAtTime(.001,now);og.gain.linearRampToValueAtTime(.8,now+.035);og.gain.exponentialRampToValueAtTime(.001,now+.48);osc.start(now);osc.stop(now+.5);
+ if(fx==='lightning'||fx==='fire'||fx==='slash'){let n=Math.floor(ctx.sampleRate*.22),buf=ctx.createBuffer(1,n,ctx.sampleRate),d=buf.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*(1-i/n);let noise=ctx.createBufferSource(),ng=ctx.createGain(),filter=ctx.createBiquadFilter();noise.buffer=buf;filter.type='lowpass';filter.frequency.value=fx==='lightning'?3600:1300;noise.connect(filter);filter.connect(ng);ng.connect(gain);ng.gain.setValueAtTime(.5,now);ng.gain.exponentialRampToValueAtTime(.001,now+.22);noise.start(now);noise.stop(now+.23)}setTimeout(()=>ctx.close(),800);
+ }catch(e){}
 }
-function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
-function addPlayer(){
-  const name = $("playerName").value.trim();
-  if(!name){$("toast").textContent="Nhập biệt danh trước nha!";return;}
-  if(players.length>=10){$("toast").textContent="Bàn này tối đa 10 người thôi!";return;}
-  players.push({name,points:0,toasts:0}); $("playerName").value="";
-  $("toast").textContent=`${name} đã vào bàn!`; render();
+function showSkillEffect(h,slot=(battleSkillChoice[h.id]??((turn-1)%4))){
+ let m=readMedia(h.id),custom=(m.skills||[])[slot]||{},fx=custom.effect&&custom.effect!=='auto'?custom.effect:skillFx(h);if(fx==='none')return;
+ let colors={fire:['#ffb13b','#ff4b19'],lightning:['#e8fbff','#39aaff'],ice:['#e8ffff','#71dfff'],heal:['#d7ffe1','#39e88b'],dark:['#d8a2ff','#7027b5'],slash:['#fff0b5','#f4a33b']},palette=colors[fx]||colors.slash;if(custom.color)palette=[custom.color,custom.color];
+ let canvas=document.createElement('canvas');canvas.className='fx-canvas';canvas.width=innerWidth*devicePixelRatio;canvas.height=innerHeight*devicePixelRatio;canvas.style.width='100vw';canvas.style.height='100vh';document.body.appendChild(canvas);let c=canvas.getContext('2d');c.scale(devicePixelRatio,devicePixelRatio);
+ let cx=innerWidth*.5,cy=innerHeight*.48,parts=Array.from({length:fx==='lightning'?95:72},()=>({a:Math.random()*Math.PI*2,v:2+Math.random()*9,r:1+Math.random()*4,life:35+Math.random()*28}));let frame=0;
+ function draw(){frame++;c.clearRect(0,0,innerWidth,innerHeight);let progress=frame/62;let grad=c.createRadialGradient(cx,cy,4,cx,cy,Math.min(innerWidth,innerHeight)*(.08+progress*.48));grad.addColorStop(0,palette[0]+'aa');grad.addColorStop(.3,palette[1]+'55');grad.addColorStop(1,palette[1]+'00');c.fillStyle=grad;c.fillRect(0,0,innerWidth,innerHeight);
+  if(fx==='lightning'){c.save();c.strokeStyle=palette[0];c.shadowColor=palette[1];c.shadowBlur=18;c.lineWidth=2.2;for(let k=0;k<9;k++){let x=cx+(Math.random()-.5)*innerWidth*.85,y=cy+(Math.random()-.5)*innerHeight*.8;c.beginPath();c.moveTo(cx,cy);let steps=7;for(let j=1;j<=steps;j++)c.lineTo(cx+(x-cx)*j/steps+(Math.random()-.5)*30,cy+(y-cy)*j/steps+(Math.random()-.5)*28);c.stroke()}c.restore()}
+  parts.forEach(p=>{let x=cx+Math.cos(p.a)*p.v*frame,y=cy+Math.sin(p.a)*p.v*frame;c.globalAlpha=Math.max(0,1-frame/p.life);c.fillStyle=frame%2?palette[0]:palette[1];c.shadowColor=palette[0];c.shadowBlur=12;c.beginPath();c.arc(x,y,p.r*(1-progress*.6),0,Math.PI*2);c.fill()});c.globalAlpha=1;
+  if(frame<62)requestAnimationFrame(draw);else canvas.remove();}
+ requestAnimationFrame(draw);
+ let flash=document.createElement('div');flash.className='fx-flash';flash.style.background=palette[0];document.body.appendChild(flash);setTimeout(()=>flash.remove(),500);
+ if(custom.gif||m.gif){let layer=document.createElement('div');layer.className='fx-layer';let img=document.createElement('img');img.src=custom.gif||m.gif;img.style.maxWidth='min(70vw,420px)';img.style.maxHeight='55vh';img.style.objectFit='contain';layer.appendChild(img);document.body.appendChild(layer);setTimeout(()=>layer.remove(),1800)}
+ let units=[...document.querySelectorAll('#myField .unit')],unit=units[teamIds.indexOf(h.id)];if(unit){let motion=custom.motion||m.motion||'lunge';if(motion!=='none'){unit.classList.remove('motion-lunge','motion-cast','motion-shake');void unit.offsetWidth;unit.classList.add('motion-'+motion);setTimeout(()=>unit.classList.remove('motion-'+motion),800)}}
+ if(custom.sound){try{let a=new Audio(custom.sound);a.volume=Number(localStorage.getItem('gameVolume')||70)/100;a.play().catch(()=>playProceduralSkillSound(fx))}catch(e){playProceduralSkillSound(fx)}}else if(m.sound){playHeroSound(h)}else playProceduralSkillSound(fx);
 }
-$("addBtn").onclick=addPlayer;
-$("playerName").addEventListener("keydown",e=>{if(e.key==="Enter")addPlayer();});
-$("startBtn").onclick=()=>{if(!players.length){$("toast").textContent="Thêm ít nhất một người chơi trước!";return;}started=true;$("roundTitle").textContent="KÈO ĐÃ BẮT ĐẦU!";$("challengeText").textContent="Host bốc thử thách hoặc cho viewer cụng ly ảo."; $("toast").textContent="Vào kèo thôi — chơi vui, không ép uống!";render();};
-$("challengeBtn").onclick=()=>{
-  const c=challenges[Math.floor(Math.random()*challenges.length)];
-  $("challengeText").textContent=c;
-  $("roundTitle").textContent="🎲 THỬ THÁCH MỚI";
-  if(players.length){players[current].points+=1; $("toast").textContent=`${players[current].name} nhận 1 điểm vì nhận kèo!`;render();}
-};
-$("toastBtn").onclick=()=>{
-  if(!players.length){$("toast").textContent="Thêm người chơi trước đã!";return;}
-  players[current].toasts+=1; players[current].points+=1;
-  $("cups").innerHTML='<span class="cup">✨</span><span class="cup">🍻</span><span class="cup">🎉</span>';
-  $("roundTitle").textContent="CỤNG LY ẢO! CHEERS!";
-  $("toast").textContent=`${players[current].name} +1 điểm! Cụng bằng nước gì cũng được nha.`;
-  render();
-};
-$("nextBtn").onclick=()=>{if(players.length){current=(current+1)%players.length;render();$("toast").textContent="Đến lượt "+players[current].name+"!";}};
-$("removeBtn").onclick=()=>{if(players.length){players.pop();current=Math.max(0,Math.min(current,players.length-1));render();$("toast").textContent="Đã xóa người chơi cuối bàn.";}};
-$("resetBtn").onclick=()=>{players=[];current=0;started=false;$("roundTitle").textContent="BÀN NHẬU ĐÃ LÊN ĐÈN!";$("roundSub").textContent="Thêm tên người chơi rồi bấm “Bắt đầu kèo”";$("challengeText").textContent="Bấm “Bốc thử thách” để lấy một câu vui cho bàn nhậu.";$("cups").innerHTML='<span class="cup">🍺</span><span class="cup">🥜</span><span class="cup">🍻</span>';$("toast").textContent="Đã mở kèo mới!";render();};
-render();
-</script>
-</body>
-</html>
+
+function getSkillData(heroId,slot){let m=readMedia(heroId);return (m.skills&&m.skills[slot])||{}}
+function loadSkillEditor(){
+ let id=Number($('editHero').value)||1,slot=Number($('skillSlot').value)||0,s=getSkillData(id,slot),h=get(id);
+ $('skName').value=s.name||(slot===0?h.skill:['Tuyệt kỹ','Hộ vệ linh hồn','Chiêu thức tối thượng'][slot-1]);
+ $('skPower').value=s.power??(slot===0?h.power:Math.max(.5,h.power*(slot===3?1.8:1.25)));
+ $('skKind').value=s.kind||h.kind;$('skMotion').value=s.motion||'lunge';$('skEffect').value=s.effect||'auto';$('skColor').value=s.color||'#e7bd70';
+ $('skSoundPreview').style.display=s.sound?'block':'none';if(s.sound){$('skSoundPreview').src=s.sound;$('skSoundPreview').load()}
+}
+function saveSkillEditor(){
+ let id=Number($('editHero').value)||1,slot=Number($('skillSlot').value)||0,m=readMedia(id);m.skills=m.skills||[];
+ let s=m.skills[slot]||{};Object.assign(s,{name:$('skName').value.trim()||'Kỹ năng mới',power:Math.max(.1,Number($('skPower').value)||1),kind:$('skKind').value,motion:$('skMotion').value,effect:$('skEffect').value,color:$('skColor').value});
+ let pending=[['gif','skGif',1000000],['sound','skSound',1500000]],i=0;
+ function next(){if(i>=pending.length){m.skills[slot]=s;try{localStorage.setItem(mediaKey(id),JSON.stringify(m));$('skillStatus').textContent='Đã lưu '+s.name+' cho '+get(id).name+'.';}catch(e){$('skillStatus').textContent='Không đủ bộ nhớ. Hãy giảm dung lượng GIF/âm thanh.'}return}
+ let [key,input,limit]=pending[i++],f=$(input).files[0];if(!f){next();return}storeFile(f,data=>{if(data)s[key]=data;next()},limit)}
+ next();
+}
+function previewSkillEditor(){
+ let id=Number($('editHero').value)||1,slot=Number($('skillSlot').value)||0,s=getSkillData(id,slot),effect=$('skEffect').value;
+ let map={auto:'✨',fire:'🔥',lightning:'⚡',ice:'❄️',heal:'💚',dark:'🌑',slash:'🗡️',none:''};
+ let layer=document.createElement('div');layer.className='fx-layer';let b=document.createElement('div');b.className='fx-burst fx-'+(effect==='auto'?'slash':effect);b.style.color=$('skColor').value;
+ if($('skGif').files[0]){let u=URL.createObjectURL($('skGif').files[0]),im=document.createElement('img');im.src=u;im.style.maxWidth='75vw';im.style.maxHeight='60vh';b.appendChild(im);setTimeout(()=>URL.revokeObjectURL(u),1500)}
+ else if(s.gif){let im=document.createElement('img');im.src=s.gif;im.style.maxWidth='75vw';im.style.maxHeight='60vh';b.appendChild(im)}else b.textContent=map[effect]??'✨';
+ layer.appendChild(b);document.body.appendChild(layer);setTimeout(()=>layer.remove(),1000);
+ let f=$('skSound').files[0];if(f){let a=new Audio(URL.createObjectURL(f));a.volume=Number(localStorage.getItem('gameVolume')||70)/100;a.play().catch(()=>{})}else if(s.sound){let a=new Audio(s.sound);a.volume=Number(localStorage.getItem('gameVolume')||70)/100;a.play().catch(()=>{})}
+}
+function artMarkup(h,cls=''){let src=currentArt(h);return src?`<img class="${cls}" src="${src}" alt="${h.name}">`:`<span>${h.icon}</span>`}
+function log(s){let e=document.createElement('div');e.textContent=s;$('log').prepend(e)}
+function save(){try{localStorage.setItem('sixVsSixSave',JSON.stringify({heroes,teamIds,gold,gems,wins,bossLevel,formation}))}catch(e){}}
+function load(){try{let d=JSON.parse(localStorage.getItem('sixVsSixSave'));if(d?.heroes?.length===50){heroes=d.heroes;teamIds=d.teamIds||[1];gold=999999999999;gems=d.gems??12;wins=d.wins??0;bossLevel=d.bossLevel??1;formation=d.formation||'balanced'}}catch(e){}}
+function teamMax(){return teamIds.reduce((s,id)=>{let h=get(id);return s+(h?h.hp+(h.level-1)*8:0)},0)}
+function formationSlots(ids,layout){let out=[];let index=0;for(let row=0;row<3;row++)for(let j=0;j<layout[row];j++)out.push(ids[index++]||null);return out}
+
+function renderSkillCommands(){
+ let root=$('skillCommands');if(!root)return;
+ root.innerHTML=teamIds.map(id=>{
+  let h=get(id),m=readMedia(id),skills=m.skills||[],slot=battleSkillChoice[id]??0;
+  let options=Array.from({length:4},(_,i)=>{let s=skills[i]||{},fallback=i===0?h.skill:['Tuyệt kỹ','Hộ vệ linh hồn','Chiêu thức tối thượng'][i-1];return `<option value="${i}" ${slot===i?'selected':''}>${i+1}. ${escapeText(s.name||fallback)}</option>`}).join('');
+  let chosen=skills[slot]||{},name=chosen.name||(slot===0?h.skill:['Tuyệt kỹ','Hộ vệ linh hồn','Chiêu thức tối thượng'][slot-1]);
+  return `<div class="skill-command"><div class="skill-command-avatar">${currentArt(h)?`<img src="${currentArt(h)}">`:h.icon}</div><div class="skill-command-info"><b>${escapeText(h.name)}</b><small>Lv.${h.level} · ${escapeText(h.role)}</small><select data-skillhero="${id}" aria-label="Chọn kỹ năng của ${escapeText(h.name)}">${options}</select><small class="skill-meta">${escapeText(name)} · ${Number(chosen.power||h.power).toFixed(1)}x sức mạnh</small></div></div>`
+ }).join('');
+ root.querySelectorAll('[data-skillhero]').forEach(sel=>sel.onchange=()=>{battleSkillChoice[Number(sel.dataset.skillhero)]=Number(sel.value);renderSkillCommands()});
+}
+function escapeText(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function renderField(){let mine=formationSlots(teamIds,layouts[formation]);$('myField').innerHTML='';mine.forEach(id=>{let h=id?get(id):null;let el=document.createElement('div');el.className='unit'+(h&&myHp[teamIds.indexOf(id)]<=0?' dead':'');el.innerHTML=h?`<div class="uicon">${artMarkup(h)}</div><b>${h.name}</b><small>${h.role} · Lv.${h.level}</small><small>❤️ ${Math.max(0,myHp[teamIds.indexOf(id)]||0)}</small>`:'<div class="uicon">＋</div><small>Ô trống</small>';$('myField').appendChild(el)});$('enemyField').innerHTML='';enemy.forEach(e=>{let h=get(e.id),el=document.createElement('div');el.className='unit'+(e.hp<=0?' dead':'');el.innerHTML=`<div class="uicon">${artMarkup(h)}</div><b>${h.name}</b><small>${h.role}</small><small>❤️ ${Math.max(0,e.hp)}</small>`;$('enemyField').appendChild(el)})}
+function renderHeroes(){
+ $('heroGrid').innerHTML='';
+ heroes.forEach(h=>{
+  h.level=h.level||1; h.stars=h.stars||1; h.weapon=h.weapon||0; h.armor=h.armor||0; h.skillLv=h.skillLv||1; h.talent=h.talent||0; h.awaken=h.awaken||0; h.rune=h.rune||0; h.bond=h.bond||0;
+  let el=document.createElement('article');
+  el.className='hero'+(teamIds.includes(h.id)?' selected':'')+(!h.owned?' locked':'');
+  el.innerHTML=`<div class="icon">${artMarkup(h,'heroArt')}</div><div class="rarity">${h.rarity.toUpperCase()} · ${h.element}</div><h3>${h.name}</h3>
+  <span class="level">⭐ ${'★'.repeat(Math.min(6,h.stars))} · Cấp ${h.level}/100</span>
+  <div class="details">❤️ ${h.hp} · ⚔️ ${h.atk}<br>${h.role} · ${h.skill}<br>${h.kind==='heal'?'Hồi máu':h.kind==='shield'?'Hộ thuẫn':'Tấn công'}</div>
+  <button class="mini ${h.owned?'alt':''}" data-team="${h.id}" ${!h.owned?'disabled':''}>${teamIds.includes(h.id)?'Bỏ khỏi đội':'Đưa vào đội'}</button>
+  <div class="upgrade-list">
+   <div class="upgrade-title">🛠️ HỆ THỐNG PHÁT TRIỂN TƯỚNG</div>
+   <button class="mini" data-upgrade="${h.id}:level" ${!h.owned||h.level>=100?'disabled':''}>⬆ Cấp nhân vật: ${h.level}/100</button>
+   <button class="mini" data-upgrade="${h.id}:star" ${!h.owned||h.stars>=6?'disabled':''}>⭐ Tăng sao: ${h.stars}/6</button>
+   <button class="mini" data-upgrade="${h.id}:weapon" ${!h.owned||h.weapon>=20?'disabled':''}>⚔️ Cường hóa vũ khí: +${h.weapon}/20</button>
+   <button class="mini" data-upgrade="${h.id}:armor" ${!h.owned||h.armor>=20?'disabled':''}>🛡️ Cường hóa giáp: +${h.armor}/20</button>
+   <button class="mini" data-upgrade="${h.id}:skill" ${!h.owned||h.skillLv>=20?'disabled':''}>✨ Nâng kỹ năng: ${h.skillLv}/20</button>
+   <button class="mini" data-upgrade="${h.id}:talent" ${!h.owned||h.talent>=10?'disabled':''}>🌳 Điểm thiên phú: ${h.talent}/10</button>
+   <button class="mini" data-upgrade="${h.id}:awaken" ${!h.owned||h.awaken>=5?'disabled':''}>💠 Thức tỉnh: ${h.awaken}/5</button>
+   <button class="mini" data-upgrade="${h.id}:rune" ${!h.owned||h.rune>=12?'disabled':''}>🔮 Khảm ngọc: ${h.rune}/12</button>
+   <button class="mini" data-upgrade="${h.id}:bond" ${!h.owned||h.bond>=10?'disabled':''}>🤝 Thân mật: ${h.bond}/10</button>
+  </div>${!h.owned?'<div class="hint">Triệu hồi để mở khóa nâng cấp</div>':''}`;
+  el.querySelector('[data-team]').onclick=()=>toggleTeam(h.id);
+  el.querySelectorAll('[data-upgrade]').forEach(b=>b.onclick=()=>upgradeFeature(b.dataset.upgrade));
+  $('heroGrid').appendChild(el);
+ });
+}
+function upgradeFeature(key){
+ let [id,type]=key.split(':'),h=get(Number(id)); if(!h||!h.owned)return;
+ const limits={level:100,star:6,weapon:20,armor:20,skill:20,talent:10,awaken:5,rune:12,bond:10};
+ const fields={level:'level',star:'stars',weapon:'weapon',armor:'armor',skill:'skillLv',talent:'talent',awaken:'awaken',rune:'rune',bond:'bond'};
+ let field=fields[type]; if(!field||h[field]>=limits[type])return;
+ h[field]++;
+ switch(type){
+  case 'level': h.hp+=15;h.atk+=4;break;
+  case 'star': h.hp=Math.round(h.hp*1.18);h.atk=Math.round(h.atk*1.18);break;
+  case 'weapon': h.atk+=5;break;
+  case 'armor': h.hp+=25;break;
+  case 'skill': h.power=+(h.power*1.06).toFixed(2);break;
+  case 'talent': h.atk+=2;h.hp+=8;break;
+  case 'awaken': h.hp+=35;h.atk+=8;h.power=+(h.power*1.1).toFixed(2);break;
+  case 'rune': h.hp+=12;h.atk+=3;break;
+  case 'bond': h.hp+=10;h.atk+=2;break;
+ }
+ log(`${h.name}: nâng cấp ${({level:'cấp nhân vật',star:'sao',weapon:'vũ khí',armor:'giáp',skill:'kỹ năng',talent:'thiên phú',awaken:'thức tỉnh',rune:'ngọc khảm',bond:'thân mật'})[type]} thành công!`);
+ render();
+}
+
+function render(){$('gold').textContent='∞';$('gems').textContent=gems;$('wins').textContent=wins;$('owned').textContent=heroes.filter(h=>h.owned).length;$('teamCount').textContent=`Đã chọn ${teamIds.length}/6 tướng`;$('php').textContent=myHp.reduce((a,b)=>a+Math.max(0,b),0);$('pmax').textContent=teamMax();$('pbar').style.width=(teamMax()?myHp.reduce((a,b)=>a+Math.max(0,b),0)/teamMax()*100:0)+'%';$('bhp').textContent=enemy.reduce((a,e)=>a+Math.max(0,e.hp),0);$('bmax').textContent=enemy.reduce((a,e)=>a+e.max,0);$('bbar').style.width=($('bmax').textContent?Number($('bhp').textContent)/Number($('bmax').textContent)*100:0)+'%';$('attack').disabled=over||teamIds.length===0;$('end').disabled=over;document.querySelectorAll('[data-formation]').forEach(b=>b.classList.toggle('active',b.dataset.formation===formation));renderField();renderHeroes();renderSkillCommands();save()}
+function toggleTeam(id){let h=get(id);if(!h.owned)return;if(teamIds.includes(id)){teamIds=teamIds.filter(x=>x!==id)}else if(teamIds.length<6)teamIds.push(id);else{$('teamCount').textContent='Đội hình đã đủ 6 tướng!';return}myHp=teamIds.map(id=>get(id).hp+(get(id).level-1)*8);render()}
+function upgrade(id){let h=get(id),cost=h.level*55;if(!h.owned||h.level>=10||gold<cost)return;/* Vàng vô hạn: không trừ vàng khi nâng cấp */h.level++;h.hp+=12;h.atk+=3;log(`${h.name} lên cấp ${h.level}: +12 máu, +3 công.`);render()}
+function makeEnemies(){let ids=[...heroes].sort((a,b)=>b.rarity.localeCompare(a.rarity)).slice(0,6).map(h=>h.id);ids=Array.from({length:6},()=>Math.floor(Math.random()*50)+1);return ids.map(id=>{let h=get(id),m=1+(bossLevel-1)*.13;let scale=Number(localStorage.getItem('enemyScale')||100)/100;return {id,hp:Math.round(h.hp*m*scale),max:Math.round(h.hp*m*scale),atk:Math.round(h.atk*m)}})}
+function startBattle(){if(teamIds.length!==6){$('status').textContent='Hãy chọn đủ 6 tướng trong Bộ sưu tập để bắt đầu trận 6v6.';document.querySelector('[data-tab="heroes"]').click();return}myHp=teamIds.map(id=>get(id).hp+(get(id).level-1)*8);enemy=makeEnemies();battleSkillChoice={};over=false;turn=1;$('overlay').classList.remove('show');$('log').innerHTML='';log(`Trận 6v6 bắt đầu! Sơ đồ ${layouts[formation].join('-')}.`);$('status').textContent='Lượt '+turn+' — chọn lệnh cho cả đội.';render()}
+function chooseTarget(){let frontCount=layouts[formation][0];let alive=enemy.filter(e=>e.hp>0);return alive[0]}
+function attack(){if(over)return;let total=0;teamIds.forEach((id,i)=>{let h=get(id),cm=readMedia(id),slot=(battleSkillChoice[id]??((turn-1)%4)),cs=(cm.skills||[])[slot]||{},skillName=cs.name||h.skill,skillPower=Number(cs.power)||h.power,skillKind=cs.kind||h.kind;if(myHp[i]<=0)return;if(skillKind==='heal'){let missing=myHp.reduce((a,b,j)=>a+Math.max(0,(get(teamIds[j]).hp+(get(teamIds[j]).level-1)*8)-b),0);let amount=Math.round(teamMax()*skillPower);for(let j=0;j<myHp.length&&amount>0;j++){let cap=get(teamIds[j]).hp+(get(teamIds[j]).level-1)*8,add=Math.min(amount,cap-myHp[j]);if(add>0){myHp[j]+=add;amount-=add}}showSkillEffect(h,slot);log(`${h.name} dùng ${skillName}, chữa trị cho đồng minh.`)}else if(skillKind==='shield'){myHp[i]=Math.min(get(id).hp+(h.level-1)*8,myHp[i]+Math.round(get(id).hp*skillPower*.35));showSkillEffect(h,slot);log(`${h.name} dùng ${skillName}, tự tạo hộ thuẫn.`)}else{showSkillEffect(h,slot);let target=chooseTarget();if(!target)return;let roleBonus=h.role==='Sát thủ'?1.18:1;let dmg=Math.round((h.atk+(h.level-1)*3)*skillPower*roleBonus*(Number(localStorage.getItem('damageScale')||100)/100));target.hp=Math.max(0,target.hp-dmg);total+=dmg;log(`${h.name} dùng ${skillName} đánh ${get(target.id).name}, gây ${dmg} sát thương.`)}});if(total)log(`Đội bạn gây tổng cộng ${total} sát thương.`);if(enemy.every(e=>e.hp<=0)){wins++;gold+=100+bossLevel*15;gems+=2;teamIds.forEach(id=>{let h=get(id);h.xp+=30;if(h.xp>=100&&h.level<10){h.xp-=100;h.level++;h.hp+=8;h.atk+=2;log(`${h.name} tự lên cấp ${h.level}!`)}});bossLevel++;finish(true);return}$('status').textContent='Đội hình đã dùng kỹ năng. Kết thúc lượt để đối thủ phản công.';render()}
+function endTurn(){if(over)return;enemy.forEach(e=>{if(e.hp<=0)return;let alive=teamIds.map((id,i)=>({id,i,hp:myHp[i]})).filter(x=>x.hp>0);if(!alive.length)return;let target=alive[Math.floor(Math.random()*alive.length)],dmg=Math.max(1,e.atk-Math.floor(get(target.id).level/2));myHp[target.i]=Math.max(0,myHp[target.i]-dmg);log(`${get(e.id).name} tấn công ${get(target.id).name}, gây ${dmg} sát thương.`)});if(myHp.every(x=>x<=0)){finish(false);return}turn++;$('status').textContent='Lượt '+turn+' — hãy chọn kỹ năng.';render()}
+function finish(win){over=true;render();$('result').textContent=win?'🏆 CHIẾN THẮNG 6v6!':'💀 THẤT BẠI!';$('resultText').textContent=win?'Bạn nhận vàng, ngọc và EXP. Đối thủ tiếp theo mạnh hơn!':'Đội hình đã bị đánh bại. Hãy đổi chiến thuật hoặc nâng cấp tướng.';$('overlay').classList.add('show')}
+function summon(){if(gems<3){$('summonResult').textContent='Không đủ ngọc!';return}let pool=heroes.filter(h=>!h.owned);if(!pool.length){$('summonResult').textContent='Đã sở hữu đủ 50 tướng!';return}gems-=3;let w={'Thường':50,'Hiếm':28,'Sử thi':14,'Huyền thoại':6,'Thần thoại':2},total=pool.reduce((s,h)=>s+w[h.rarity],0),r=Math.random()*total,got=pool[0];for(let h of pool){r-=w[h.rarity];if(r<=0){got=h;break}}got.owned=true;$('summonResult').textContent=`🎉 Nhận được ${got.icon} ${got.name} — ${got.rarity}!`;$('summonResult').style.color='#ffd166';log(`Triệu hồi thành công ${got.name}!`);render()}
+
+function fillEditor(){let sel=$('editHero');sel.innerHTML=heroes.map(h=>`<option value="${h.id}">${h.id}. ${h.name}</option>`).join('');sel.onchange=loadEditor;loadEditor()}
+function loadEditor(){let h=get(Number($('editHero').value)||1);if(!h)return;[['edName','name'],['edIcon','icon'],['edElement','element'],['edRole','role'],['edSkill','skill'],['edKind','kind'],['edRarity','rarity'],['edLevel','level'],['edHp','hp'],['edAtk','atk'],['edPower','power']].forEach(([a,b])=>$(a).value=h[b]);let art=currentArt(h),m=readMedia(h.id);$('edEffect').value=m.effect||'auto';$('edMotion').value=m.motion||'lunge';$('soundPreview').style.display=m.sound?'block':'none';if(m.sound)$('soundPreview').src=m.sound;$('heroEditPreview').innerHTML=art?`<img src="${art}">`:`${h.icon} ${h.name}`;$('heroMediaPreview').innerHTML=(m.gif?`<div><b>GIF kỹ năng</b><br><img class="heroArt" src="${m.gif}"></div>`:'')+(m.video?`<div><b>Video giới thiệu</b><br><video class="mediaVideo" controls playsinline src="${m.video}"></video></div>`:'')||'Chưa có GIF/video tùy chỉnh';}
+function storeFile(file,done,max=900000){if(!file)return done(null);if(file.size>max){$('editStatus').textContent='File quá lớn. Hãy nén ảnh/video nhỏ hơn '+Math.round(max/1024)+' KB.';return done(false)}let r=new FileReader();r.onload=()=>done(r.result);r.onerror=()=>done(false);r.readAsDataURL(file)}
+function saveEditor(){let h=get(Number($('editHero').value));if(!h)return;h.name=$('edName').value.trim()||h.name;h.icon=$('edIcon').value||h.icon;h.element=$('edElement').value;h.role=$('edRole').value;h.skill=$('edSkill').value;h.kind=$('edKind').value;h.rarity=$('edRarity').value;h.level=Math.max(1,Math.min(100,Number($('edLevel').value)||1));h.hp=Math.max(1,Number($('edHp').value)||1);h.atk=Math.max(1,Number($('edAtk').value)||1);h.power=Math.max(.1,Number($('edPower').value)||1);let m=readMedia(h.id);m.effect=$('edEffect').value;m.motion=$('edMotion').value;let files=[['portrait','heroPortrait'],['stage10','stage10'],['stage30','stage30'],['stage50','stage50'],['stage70','stage70'],['stage90','stage90'],['gif','heroGif'],['video','heroVideo'],['sound','heroSound']].filter(([k,id])=>$(id).files[0]);let i=0;function next(){if(i>=files.length){try{localStorage.setItem(mediaKey(h.id),JSON.stringify(m));save();fillEditor();render();$('editStatus').textContent='Đã lưu tướng và media!';log('Đã tùy chỉnh '+h.name+'.')}catch(e){$('editStatus').textContent='Bộ nhớ trình duyệt đã đầy. Hãy dùng ảnh nhỏ hơn hoặc xóa media cũ.'}return}let [key,id]=files[i++],f=$(id).files[0],limit=key==='video'?3000000:key==='gif'?1000000:key==='sound'?1500000:900000;storeFile(f,data=>{if(data)m[key]=data;next()},limit)}next()}
+function setupWorkshop(){fillEditor();loadSkillEditor();$('gameVolume').value=localStorage.getItem('gameVolume')||70;$('volumeValue').textContent=$('gameVolume').value+'%';$('gameVolume').oninput=e=>{$('volumeValue').textContent=e.target.value+'%';localStorage.setItem('gameVolume',e.target.value)};$('saveHeroEdit').onclick=saveEditor;
+$('skillSlot').onchange=loadSkillEditor;$('editHero').addEventListener('change',loadSkillEditor);
+$('saveSkill').onclick=saveSkillEditor;$('previewSkill').onclick=previewSkillEditor;
+$('skSound').onchange=e=>{let f=e.target.files[0];if(!f)return;let u=URL.createObjectURL(f);$('skSoundPreview').src=u;$('skSoundPreview').style.display='block'};
+$('heroSound').onchange=e=>{let f=e.target.files[0];if(!f)return;storeFile(f,data=>{if(data){$('soundPreview').src=data;$('soundPreview').style.display='block';$('soundPreview').load()}},1500000)};$('resetHeroMedia').onclick=()=>{let id=$('editHero').value;localStorage.removeItem(mediaKey(id));loadEditor();$('editStatus').textContent='Đã xóa ảnh/GIF/video tùy chỉnh.';render()};$('damageScale').oninput=e=>$('damageValue').textContent=e.target.value+'%';$('enemyScale').oninput=e=>$('enemyValue').textContent=e.target.value+'%';$('damageScale').value=localStorage.getItem('damageScale')||100;$('enemyScale').value=localStorage.getItem('enemyScale')||100;$('damageValue').textContent=$('damageScale').value+'%';$('enemyValue').textContent=$('enemyScale').value+'%';$('saveRules').onclick=()=>{localStorage.setItem('damageScale',$('damageScale').value);localStorage.setItem('enemyScale',$('enemyScale').value);localStorage.setItem('animSpeed',$('animSpeed').value);$('editStatus').textContent='Đã áp dụng luật chơi cho trận kế tiếp.'};$('exportData').onclick=()=>{let blob=new Blob([JSON.stringify({heroes,teamIds,wins,bossLevel,formation},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='dai-chien-du-lieu-tuong.json';a.click();URL.revokeObjectURL(a.href)};$('importData').onchange=e=>{let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let d=JSON.parse(r.result);if(!Array.isArray(d.heroes)||d.heroes.length!==50)throw Error();heroes=d.heroes;teamIds=d.teamIds||[1];wins=d.wins||0;bossLevel=d.bossLevel||1;formation=d.formation||'balanced';save();fillEditor();render();$('editStatus').textContent='Đã nhập dữ liệu tướng.'}catch(err){$('editStatus').textContent='File JSON không đúng định dạng game.'}};r.readAsText(f)}}
+function loadCustomBackgrounds(){
+ try{
+  let b=localStorage.getItem('customGameBg'),a=localStorage.getItem('customArenaBg');
+  if(b){document.body.style.backgroundImage=`linear-gradient(#10162966,#101629aa),url("${b}")`;document.body.style.backgroundSize='cover';document.body.style.backgroundAttachment='fixed';$('bgPreview').style.backgroundImage=`url("${b}")`;$('bgPreview').textContent='';}
+  if(a){let el=document.querySelector('#battle .battlefields');if(el){el.style.backgroundImage=`linear-gradient(#10162966,#10162966),url("${a}")`;el.style.backgroundSize='cover';el.style.backgroundPosition='center';el.style.padding='12px';el.style.borderRadius='12px';}$('arenaPreview').style.backgroundImage=`url("${a}")`;$('arenaPreview').textContent='';}
+ }catch(e){}
+}
+function imageToSmallData(file,callback){
+ if(!file||!file.type.startsWith('image/'))return;
+ let reader=new FileReader();reader.onload=ev=>{let img=new Image();img.onload=()=>{let scale=Math.min(1,1600/img.width);let c=document.createElement('canvas');c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);c.getContext('2d').drawImage(img,0,0,c.width,c.height);callback(c.toDataURL('image/jpeg',.78));};img.src=ev.target.result;};reader.readAsDataURL(file);
+}
+$('bgUpload').onchange=e=>imageToSmallData(e.target.files[0],data=>{try{localStorage.setItem('customGameBg',data);loadCustomBackgrounds();log('Đã thay ảnh nền trò chơi.');}catch(err){alert('Ảnh quá lớn. Hãy chọn ảnh khác nhỏ hơn.');}});
+$('arenaUpload').onchange=e=>imageToSmallData(e.target.files[0],data=>{try{localStorage.setItem('customArenaBg',data);loadCustomBackgrounds();log('Đã thay ảnh nền chiến trường.');}catch(err){alert('Ảnh quá lớn. Hãy chọn ảnh khác nhỏ hơn.');}});
+$('resetBackgrounds').onclick=()=>{localStorage.removeItem('customGameBg');localStorage.removeItem('customArenaBg');document.body.style.backgroundImage='radial-gradient(ellipse at top,#2b3b63,#101629 68%)';let el=document.querySelector('#battle .battlefields');el.style.backgroundImage='';$('bgPreview').style.backgroundImage='';$('bgPreview').textContent='Chưa chọn ảnh nền';$('arenaPreview').style.backgroundImage='';$('arenaPreview').textContent='Chưa chọn ảnh chiến trường';};
+
+loadCustomBackgrounds();
+setupWorkshop();
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab[data-tab]').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.view').forEach(v=>v.style.display=v.id===b.dataset.tab?'block':'none')});
+document.querySelectorAll('[data-formation]').forEach(b=>b.onclick=()=>{formation=b.dataset.formation;$('formationText').textContent=formation==='balanced'?'Cân bằng: 2 trước, 2 giữa, 2 sau.':formation==='front'?'Phòng thủ: 3 trước, 2 giữa, 1 sau.':'Tấn công: 1 trước, 2 giữa, 3 sau.';render()});
+$('attack').onclick=attack;$('end').onclick=endTurn;$('newBattle').onclick=startBattle;$('summonBtn').onclick=summon;
+load();myHp=teamIds.map(id=>get(id).hp);enemy=makeEnemies();render();$('status').textContent='Chọn đủ 6 tướng trong Bộ sưu tập để bắt đầu trận 6v6.';
+</script></body></html>
